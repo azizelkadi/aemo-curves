@@ -62,6 +62,14 @@ Every run is scored against a baseline (the experiment's `evaluate.baseline`,
 usually the lag curve at the forecast horizon) on the exact same test rows, so
 deltas are apples-to-apples.
 
+## Results
+
+The full results for the two groups are in [`docs/results.md`](docs/results.md).
+On **demand**, the v_grid retrieval champion (`vgrid_rolling_ridge_exog`) reaches
+HC-MAE 123.75 against the lag-7 baseline 148.97 (a 25.2 $/MWh gain). On
+**supply**, the lag-7 baseline (54.83) is hard to beat: the oracle ceiling is
+only 7.77 below it and the retrieval methods do not improve on it.
+
 ## Project layout
 
 ```

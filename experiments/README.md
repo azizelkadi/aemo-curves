@@ -12,7 +12,8 @@ uv run python scripts/run_experiment.py demand_7d.vgrid_rolling_ridge_exog
 
 An experiment names one strategy per stage; see
 [`docs/architecture.md`](../docs/architecture.md) for the format and
-[`CLAUDE.md`](../CLAUDE.md) for the registered strategies and metrics.
+[`CLAUDE.md`](../CLAUDE.md) for the registered strategies and metrics. Measured
+results are in [`docs/results.md`](../docs/results.md).
 
 ## Groups
 

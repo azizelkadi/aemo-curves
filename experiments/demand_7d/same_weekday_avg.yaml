@@ -1,8 +1,9 @@
 name: demand_7d.same_weekday_avg
-description: 'Best learning-free method: average of recent same-weekday curves.'
+description: 'Best learning-free method: average of recent same-weekday curves (interp
+  embedding).'
 data:
   side: demand
-  features: v_grid
+  features: interp
   split: canonical
   lag_days: 7
 predict:
@@ -19,4 +20,4 @@ evaluate:
     strategy: lag1
     params:
       lag_days: 7
-notes: 'Best learning-free method: average of recent same-weekday curves.'
+notes: 'Best learning-free method: average of recent same-weekday curves (interp embedding).'

@@ -62,6 +62,7 @@ def run_experiment(
     features = data.get("features", "interp")
     split = data.get("split", "canonical")
     k = data.get("k")
+    lag_days = int(data.get("lag_days", experiment.predict_params.get("lag_days", 1)))
 
     train, test = load_features(side, features, split, k=k)
     if subset:
@@ -71,9 +72,12 @@ def run_experiment(
     if exog_provider is None and experiment.extra_params.get("exog"):
         from aemo_curves.exogenous import build_exog_provider
 
-        exog_provider = build_exog_provider(experiment.extra_params["exog"], side=side)
+        # Shift exogenous features by the forecast horizon so they never peek
+        # inside the gap (a 7-day-ahead model may only use data >= 7 days old).
+        exog_provider = build_exog_provider(
+            experiment.extra_params["exog"], side=side, lag_days=lag_days
+        )
 
-    lag_days = int(data.get("lag_days", experiment.predict_params.get("lag_days", 1)))
     ctx = PredictContext(
         train=train,
         test=test,
