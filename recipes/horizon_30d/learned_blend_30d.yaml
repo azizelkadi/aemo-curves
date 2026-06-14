@@ -1,0 +1,23 @@
+name: horizon_30d.learned_blend_30d
+description: Non-negative learned blend of lags.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 30
+predict:
+  strategy: learned_blend
+  params:
+    lags:
+    - 30
+    - 31
+    - 37
+    - 44
+    - 60
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 30
+notes: Non-negative learned blend of lags.

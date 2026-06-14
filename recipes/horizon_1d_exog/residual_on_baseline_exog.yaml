@@ -1,0 +1,26 @@
+name: horizon_1d_exog.residual_on_baseline_exog
+description: residual_on_baseline with proxy exogenous features at lag-1.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 1
+predict:
+  strategy: residual_on_baseline
+  params:
+    lags:
+    - 1
+    - 2
+    - 7
+    - 14
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 1
+notes: residual_on_baseline with proxy exogenous features at lag-1.
+params:
+  exog:
+    sources:
+    - proxy

@@ -1,0 +1,17 @@
+name: proposals_top5.exp5_fof_snap
+description: Function-on-function snap proposal.
+data:
+  side: demand
+  features: interp
+  split: user2024
+  lag_days: 30
+predict:
+  strategy: fof_snap
+  params: {}
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 30
+notes: Function-on-function snap proposal.

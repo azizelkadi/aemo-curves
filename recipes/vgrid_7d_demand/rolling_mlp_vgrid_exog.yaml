@@ -1,0 +1,25 @@
+name: vgrid_7d_demand.rolling_mlp_vgrid_exog
+description: Rolling refit k=1 neural on v_grid at lag-7.
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit
+  params:
+    query: neural
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Rolling refit k=1 neural on v_grid at lag-7.
+params:
+  exog:
+    sources:
+    - proxy
+    - weather

@@ -1,0 +1,23 @@
+name: horizon_1d.per_day_shift
+description: Per-day vertical-shift corrector.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 1
+predict:
+  strategy: per_day_shift
+  params:
+    lags:
+    - 1
+    - 2
+    - 7
+    - 14
+    shrinkage: 1.0
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 1
+notes: Per-day vertical-shift corrector.

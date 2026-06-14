@@ -1,0 +1,19 @@
+name: vgrid_1d_demand.strat_knn_vgrid_oracle
+description: Static stratified k=1 oracle retrieval on v_grid at lag-1.
+data:
+  side: demand
+  features: v_grid
+  split: user2024
+  lag_days: 1
+predict:
+  strategy: static_retrieval
+  params:
+    query: oracle
+    ridge_alpha: 200.0
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 1
+notes: Static stratified k=1 oracle retrieval on v_grid at lag-1.

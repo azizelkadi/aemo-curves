@@ -1,0 +1,19 @@
+name: dtw_kmedoids_demand.predicted_kmedoids_ridge_1d
+description: Ridge prototype prediction at lag-1.
+data:
+  side: demand
+  features: kmedoids
+  split: canonical
+  k: 24
+  lag_days: 1
+predict:
+  strategy: dtw_predicted
+  params:
+    query: ridge
+evaluate:
+  metric: dtw
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 1
+notes: Ridge prototype prediction at lag-1.

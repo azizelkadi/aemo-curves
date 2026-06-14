@@ -1,0 +1,17 @@
+name: horizon_1d.oracle_shift_diagnostic
+description: Oracle vertical-shift diagnostic upper bound.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 1
+predict:
+  strategy: oracle_shift
+  params: {}
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 1
+notes: Oracle vertical-shift diagnostic upper bound.

@@ -1,0 +1,22 @@
+name: horizon_7d.same_weekday_avg_7d
+description: Same-weekday average at lag-7.
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: same_weekday_avg
+  params:
+    lags:
+    - 7
+    - 14
+    - 21
+    - 28
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Same-weekday average at lag-7.

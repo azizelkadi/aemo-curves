@@ -1,0 +1,23 @@
+name: retrieval_demand_30d.strat_knn_30d
+description: Stratified k-NN at lag-30.
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 30
+predict:
+  strategy: stratified_knn
+  params:
+    k: 1
+    lag_days: 30
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+    ridge_lags:
+    - 30
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 30
+notes: Stratified k-NN at lag-30.

@@ -1,0 +1,22 @@
+name: horizon_30d.residual_embedding_ridge_30d
+description: Ridge residual corrector at lag-30.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 30
+predict:
+  strategy: residual_embedding
+  params:
+    lags:
+    - 30
+    - 31
+    - 37
+    - 44
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 30
+notes: Ridge residual corrector at lag-30.

@@ -1,0 +1,20 @@
+name: vgrid_30d_demand.rolling_oracle_vgrid
+description: Rolling refit k=1 oracle on v_grid at lag-30.
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 30
+predict:
+  strategy: rolling_refit
+  params:
+    query: oracle
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 30
+notes: Rolling refit k=1 oracle on v_grid at lag-30.

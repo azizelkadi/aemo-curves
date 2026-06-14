@@ -1,0 +1,17 @@
+name: proposals_top5.exp8_logderiv_fpca
+description: Log-derivative FPCA proposal.
+data:
+  side: demand
+  features: interp
+  split: user2024
+  lag_days: 30
+predict:
+  strategy: logderiv_fpca
+  params: {}
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 30
+notes: Log-derivative FPCA proposal.

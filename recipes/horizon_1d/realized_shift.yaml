@@ -1,0 +1,17 @@
+name: horizon_1d.realized_shift
+description: Realized shift predictor.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 1
+predict:
+  strategy: realized_shift
+  params: {}
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 1
+notes: Realized shift predictor.

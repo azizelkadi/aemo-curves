@@ -1,0 +1,22 @@
+name: recompute_2024test.exp4_residual
+description: Residual-on-baseline corrector.
+data:
+  side: demand
+  features: interp
+  split: user2024
+  lag_days: 30
+predict:
+  strategy: residual_on_baseline
+  params:
+    lags:
+    - 30
+    - 31
+    - 37
+    - 44
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 30
+notes: Residual-on-baseline corrector.

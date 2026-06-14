@@ -1,0 +1,39 @@
+# Environment
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# Caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local artifacts
+artifacts/
+mlruns/
+mlartifacts/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+
+# Raw monthly CSVs are large and may have license terms, so they are not
+# published. The repo ships only stem-bids-and-offers-SAMPLE.csv as an example.
+data/
+
+# Copyrighted papers
+docs/*.pdf
+
+
+# Scratch space and third-party seed material (not for publication)
+pad/
+
+# Repo-local SSH key + GitHub config (never commit, never global)
+.local/
+
+# Local Claude Code permissions (machine-local)
+.claude/settings.local.json

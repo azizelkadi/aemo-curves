@@ -1,0 +1,22 @@
+name: horizon_30d.per_day_shift_30d
+description: Per-day shift corrector at lag-30.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 30
+predict:
+  strategy: per_day_shift
+  params:
+    lags:
+    - 30
+    - 31
+    - 37
+    - 44
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 30
+notes: Per-day shift corrector at lag-30.

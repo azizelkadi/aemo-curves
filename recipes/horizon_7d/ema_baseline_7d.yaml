@@ -1,0 +1,21 @@
+name: horizon_7d.ema_baseline_7d
+description: EMA mixture on the lag-7 structure.
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: ema_baseline
+  params:
+    lags:
+    - 7
+    - 8
+    - 14
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: EMA mixture on the lag-7 structure.

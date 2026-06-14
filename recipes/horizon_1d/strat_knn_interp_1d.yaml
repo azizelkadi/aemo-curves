@@ -1,0 +1,26 @@
+name: horizon_1d.strat_knn_interp_1d
+description: Stratified k=1 ridge retrieval on the interp embedding.
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 1
+predict:
+  strategy: stratified_knn
+  params:
+    k: 1
+    query: ridge
+    bucket: interval_dow
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+    ridge_lags:
+    - 1
+    lag_days: 1
+    output_mode: top1_curve
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 1
+notes: Stratified k=1 ridge retrieval on the interp embedding.

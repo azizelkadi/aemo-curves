@@ -1,0 +1,18 @@
+name: horizon_1d.baseline_lag7
+description: Lag-7 curve scored against the lag-1 baseline.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 1
+predict:
+  strategy: lag1
+  params:
+    lag_days: 7
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 1
+notes: Lag-7 curve scored against the lag-1 baseline.

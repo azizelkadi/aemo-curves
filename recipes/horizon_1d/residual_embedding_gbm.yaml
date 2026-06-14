@@ -1,0 +1,24 @@
+name: horizon_1d.residual_embedding_gbm
+description: GBM residual corrector in embedding space.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 1
+predict:
+  strategy: residual_embedding_gbm
+  params:
+    lags:
+    - 1
+    - 2
+    - 7
+    - 14
+    n_pca_x: 20
+    n_pca_y: 6
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 1
+notes: GBM residual corrector in embedding space.

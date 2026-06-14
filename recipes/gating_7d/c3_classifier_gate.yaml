@@ -1,0 +1,20 @@
+name: gating_7d.c3_classifier_gate
+description: Gated blend of the v_grid champion and the lag-7 baseline (classifier_gate).
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: gate_blend
+  params:
+    mode: classifier_gate
+    champion: vgrid_d7d__rolling_ridge_exog
+    baseline_run: 7d__baseline_lag7_demand
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Gated blend of the v_grid champion and the lag-7 baseline (classifier_gate).

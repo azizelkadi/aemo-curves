@@ -1,0 +1,19 @@
+name: recompute_2024test.exp1_strat_knn
+description: Static ridge retrieval on the 2024 recut.
+data:
+  side: demand
+  features: interp
+  split: user2024
+  lag_days: 30
+predict:
+  strategy: static_retrieval
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 30
+notes: Static ridge retrieval on the 2024 recut.

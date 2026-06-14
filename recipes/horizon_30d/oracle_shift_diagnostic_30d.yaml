@@ -1,0 +1,18 @@
+name: horizon_30d.oracle_shift_diagnostic_30d
+description: Oracle shift diagnostic at lag-30.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 30
+predict:
+  strategy: oracle_shift
+  params:
+    base_lag: 30
+evaluate:
+  metric: wasserstein
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 30
+notes: Oracle shift diagnostic at lag-30.
