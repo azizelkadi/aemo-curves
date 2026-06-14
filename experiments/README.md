@@ -29,9 +29,10 @@ Run a whole group and get a ranked leaderboard (the main entrypoint):
 uv run python scripts/run_group.py demand.7d.hc_mae
 ```
 
-Group runs are cached under `artifacts/cache/`, so re-running after adding one
-experiment computes only the new one. Run a single experiment by its dotted name
-(the dots are the folders):
+Each full group run writes an up-to-date `results.md` leaderboard into the group
+folder (for example `demand/7d/hc_mae/results.md`). Group runs are cached under
+`artifacts/cache/`, so re-running after adding one experiment computes only the
+new one. Run a single experiment by its dotted name (the dots are the folders):
 
 ```bash
 uv run python scripts/run_experiment.py demand.7d.hc_mae.vgrid.rolling_ridge_exog

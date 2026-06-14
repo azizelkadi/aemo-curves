@@ -148,12 +148,17 @@ ranked by the metric:
 uv run python scripts/run_group.py demand.7d.hc_mae
 ```
 
+Each full run also writes a `results.md` comparison into the group folder (for
+example [`experiments/demand/7d/hc_mae/results.md`](experiments/demand/7d/hc_mae/results.md)),
+so every comparable group keeps an up-to-date leaderboard next to its
+experiments.
+
 Results are cached under `artifacts/cache/`. Re-running a group recomputes only
 what changed, so after adding one experiment the same command computes only the
 new one and reuses the rest. Use `--no-cache` to force a full recompute (do this
 after changing strategy code), `--subset-days N` for a fast check, and `--save
-results.csv` to write the leaderboard. The same is available as `aemo-run group
-demand.7d.hc_mae`.
+results.csv` to write the leaderboard CSV. The same is available as `aemo-run
+group demand.7d.hc_mae`.
 
 ### 5. Browse results
 

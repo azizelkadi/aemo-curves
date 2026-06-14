@@ -125,8 +125,10 @@ subset, for example `--subset-days 3`.
 
 A group is one `experiments/<side>/<horizon>/<metric>/` folder. `run_group`
 runs every experiment under it (across all family sub-folders), checks that they
-share the side, horizon, metric, and baseline, and returns a leaderboard ranked
-by the metric. This is the main way to produce a comparison.
+share the side, horizon, metric, and baseline, returns a leaderboard ranked by
+the metric, and writes that leaderboard to `results.md` in the folder. This is
+the main way to produce a comparison; every group keeps an up-to-date
+`results.md` next to its experiments.
 
 ```bash
 uv run python scripts/run_group.py demand.7d.hc_mae
