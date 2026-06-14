@@ -44,16 +44,16 @@ def build_embeddings(side: str = "supply") -> None:
 
 @app.command("run")
 def run(name: str, mlflow: bool = True, subset_days: int = 0) -> None:
-    """Run a recipe by its dotted name: e.g. `aemo-run run horizon_1d.baseline_lag1`."""
-    from .core.recipe import Recipe
-    from .runner import run_recipe
+    """Run an experiment by its dotted name: e.g. `aemo-run run horizon_1d.baseline_lag1`."""
+    from .core.experiment import Experiment
+    from .runner import run_experiment
 
-    group, _, recipe_name = name.partition(".")
-    path = PROJECT_ROOT / "recipes" / group / f"{recipe_name}.yaml"
+    group, _, experiment_name = name.partition(".")
+    path = PROJECT_ROOT / "experiments" / group / f"{experiment_name}.yaml"
     if not path.exists():
-        raise typer.BadParameter(f"No recipe at {path}")
+        raise typer.BadParameter(f"No experiment at {path}")
     subset = {"test_days": subset_days} if subset_days else None
-    res = run_recipe(Recipe.from_yaml(path), log_to_mlflow=mlflow, subset=subset)
+    res = run_experiment(Experiment.from_yaml(path), log_to_mlflow=mlflow, subset=subset)
     print(f"\n=== {res.experiment_name} ===")
     for k, v in res.metrics.items():
         print(f"  {k}: {v}")

@@ -1,0 +1,20 @@
+name: demand_7d.vgrid_rolling_ridge
+description: v_grid retrieval, rolling monthly ridge refit.
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: v_grid retrieval, rolling monthly ridge refit.

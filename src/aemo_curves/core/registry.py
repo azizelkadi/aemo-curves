@@ -1,6 +1,6 @@
 """Strategy registry: every stage maps strategy names to implementations.
 
-A recipe names one strategy per stage; the runner looks it up here. Importing a
+An experiment names one strategy per stage; the runner looks it up here. Importing a
 stage package registers its strategies as a side effect, so call `bootstrap()`
 (or import the stage packages) before resolving names.
 """

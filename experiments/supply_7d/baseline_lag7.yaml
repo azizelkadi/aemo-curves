@@ -1,0 +1,18 @@
+name: supply_7d.baseline_lag7
+description: 'Lag-7 baseline: the curve at the same interval seven days earlier.'
+data:
+  side: supply
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: lag1
+  params:
+    lag_days: 7
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Lag-7 baseline: the curve at the same interval seven days earlier.'

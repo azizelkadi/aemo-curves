@@ -1,4 +1,4 @@
-"""Resolve a recipe `data` block to the train and test feature tables.
+"""Resolve an experiment `data` block to the train and test feature tables.
 
 The load/curves/features stages are built once by `scripts/build_*.py` and
 cached under `artifacts/`. Here we only read those cached tables for a given

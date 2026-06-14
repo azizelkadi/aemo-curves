@@ -45,7 +45,7 @@ One row per horizon, only the best realised model. All values in $/MWh.
 | **7 days** | `vgrid_rolling_ridge_exog` | 148.97 | **123.41** | **-25.56** | 60.3 % | 27.96 | 121.01 | 21.1 % |
 | **30 days** | `vgrid_rolling_ridge`| 171.54 | **132.62** | **-38.92** | 62.9 % | 27.96 | 143.58 | 27.1 % |
 
-**Reading.** The same retrieval recipe wins at every horizon. The further
+**Reading.** The same retrieval experiment wins at every horizon. The further
 out we predict, the **bigger the absolute win** ($/MWh) and the **larger
 share of the available headroom** we close - because the baseline gets
 much worse with horizon while the oracle stays the same.
@@ -112,7 +112,7 @@ month-old curves miss any recent regime drift.
 | `same_weekday_avg_30d` | 149.16 | -22.38 | 55.1 % | Best learning-free method - strong weekly seasonality at this horizon |
 | `residual_on_baseline_ridge_30d` | 170.77 | -0.77 | 56.7 % | Tiny edit to the lag-30 staircase |
 | `ema_baseline_30d` | 170.63 | -0.91 | 56.0 % | EMA over lags 30, 31, 37 |
-| `interp_strat_knn_30d` | 174.29 | +2.75 | 48.1 % | Same recipe with the wrong embedding geometry - sign-flips under HC-MAE |
+| `interp_strat_knn_30d` | 174.29 | +2.75 | 48.1 % | Same experiment with the wrong embedding geometry - sign-flips under HC-MAE |
 | `lag30_baseline` | 171.54 | 0 | - | Reference |
 | `Oracle` | 27.96 | -143.58 | 95.5 % | Best possible bucket-restricted pick |
 

@@ -1,6 +1,6 @@
-"""Run one recipe end to end: data -> predict -> evaluate -> result.
+"""Run one experiment end to end: data -> predict -> evaluate -> result.
 
-The runner reads the recipe, resolves the feature tables, runs the named
+The runner reads the experiment, resolves the feature tables, runs the named
 predict strategy, validates the predictions against the catalog, scores them
 under the named metric against the named baseline, validates the scores, and
 returns an `ExperimentResult` (logged to MLflow unless turned off).
@@ -14,7 +14,7 @@ import pandas as pd
 from aemo_curves.catalog import PREDICTIONS, SCORES
 from aemo_curves.core.contracts import ContractError
 from aemo_curves.core.datasets import historical_from, load_features
-from aemo_curves.core.recipe import Recipe
+from aemo_curves.core.experiment import Experiment
 from aemo_curves.core.registry import get
 from aemo_curves.core.result import ExperimentResult
 from aemo_curves.runner.context import PredictContext
@@ -49,15 +49,15 @@ def _subset(train: pd.DataFrame, test: pd.DataFrame, subset: dict) -> tuple[pd.D
     return train, test
 
 
-def run_recipe(
-    recipe: Recipe,
+def run_experiment(
+    experiment: Experiment,
     *,
     log_to_mlflow: bool = True,
     subset: dict | None = None,
     exog_provider: object | None = None,
 ) -> ExperimentResult:
     bootstrap()
-    data = recipe.data
+    data = experiment.data
     side = data.get("side", "supply")
     features = data.get("features", "interp")
     split = data.get("split", "canonical")
@@ -68,12 +68,12 @@ def run_recipe(
         train, test = _subset(train, test, subset)
     historical = historical_from(train, test)
 
-    if exog_provider is None and recipe.extra_params.get("exog"):
+    if exog_provider is None and experiment.extra_params.get("exog"):
         from aemo_curves.exogenous import build_exog_provider
 
-        exog_provider = build_exog_provider(recipe.extra_params["exog"], side=side)
+        exog_provider = build_exog_provider(experiment.extra_params["exog"], side=side)
 
-    lag_days = int(data.get("lag_days", recipe.predict_params.get("lag_days", 1)))
+    lag_days = int(data.get("lag_days", experiment.predict_params.get("lag_days", 1)))
     ctx = PredictContext(
         train=train,
         test=test,
@@ -86,17 +86,17 @@ def run_recipe(
         extra={"k": k} if k is not None else {},
     )
 
-    predict_strategy = get("predict", recipe.predict_strategy)
-    predictions = predict_strategy(ctx, **recipe.predict_params)
+    predict_strategy = get("predict", experiment.predict_strategy)
+    predictions = predict_strategy(ctx, **experiment.predict_params)
     PREDICTIONS.validate(predictions)
 
-    metric = get("evaluate", recipe.metric)
+    metric = get("evaluate", experiment.metric)
     from aemo_curves.stages.evaluate import attach_baseline, score_predictions, summary_stats
 
     scored = score_predictions(predictions, metric)
-    if recipe.baseline is not None:
-        baseline_strategy = get("predict", recipe.baseline["strategy"])
-        baseline_preds = baseline_strategy(ctx, **recipe.baseline.get("params", {}))
+    if experiment.baseline is not None:
+        baseline_strategy = get("predict", experiment.baseline["strategy"])
+        baseline_preds = baseline_strategy(ctx, **experiment.baseline.get("params", {}))
         baseline_scored = score_predictions(baseline_preds, metric)
         scored = attach_baseline(scored, baseline_scored, metric)
     metrics = summary_stats(scored, metric)
@@ -104,22 +104,22 @@ def run_recipe(
     if metric.curve_col not in scored.columns:
         raise ContractError(f"scores: missing metric column {metric.curve_col!r}")
 
-    params = {"side": side, "features": features, "split": split, "strategy": recipe.predict_strategy}
-    params.update(recipe.predict_params)
-    if recipe.baseline is not None:
-        params["baseline"] = recipe.baseline["strategy"]
-        params.update({f"baseline_{k}": v for k, v in recipe.baseline.get("params", {}).items()})
-    params.update(recipe.extra_params)
+    params = {"side": side, "features": features, "split": split, "strategy": experiment.predict_strategy}
+    params.update(experiment.predict_params)
+    if experiment.baseline is not None:
+        params["baseline"] = experiment.baseline["strategy"]
+        params.update({f"baseline_{k}": v for k, v in experiment.baseline.get("params", {}).items()})
+    params.update(experiment.extra_params)
 
     result = ExperimentResult(
-        experiment_name=recipe.name,
-        model_name=recipe.predict_strategy,
+        experiment_name=experiment.name,
+        model_name=experiment.predict_strategy,
         params=params,
         metrics=metrics,
         predictions=scored,
-        notes=recipe.notes,
+        notes=experiment.notes,
     )
     if log_to_mlflow:
         result.mlflow_run_id = log_experiment_result(result)
-        log.info("Logged MLflow run %s for recipe %s", result.mlflow_run_id, recipe.name)
+        log.info("Logged MLflow run %s for experiment %s", result.mlflow_run_id, experiment.name)
     return result

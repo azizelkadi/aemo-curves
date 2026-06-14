@@ -10,7 +10,7 @@ import pandas as pd
 
 @dataclass
 class ExperimentResult:
-    """Result of running a single recipe on its test window."""
+    """Result of running a single experiment on its test window."""
 
     experiment_name: str
     model_name: str

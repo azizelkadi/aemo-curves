@@ -50,11 +50,11 @@ All papers visited by the five-expert board while preparing [`research_proposals
 - **Chen, Kornblith, Norouzi, Hinton, *A Simple Framework for Contrastive Learning of Visual Representations (SimCLR)*** (ICML 2020). https://arxiv.org/abs/2002.05709 - Canonical NT-Xent contrastive learner; template for #17 and most subsequent SSL papers.
 - **Khosla et al., *Supervised Contrastive Learning*** (NeurIPS 2020). https://arxiv.org/abs/2004.11362 - Supervised positive sets within contrastive loss; outperforms cross-entropy on many tasks.
 - **Frogner, Mirzazadeh, Solomon, *Learning Embeddings into Entropic Wasserstein Spaces*** (ICLR 2019). https://openreview.net/forum?id=rJg4J3CqFm - Train an encoder so that L² in the embedding space matches Wasserstein in the data space - direct theoretical motivation for Proposal #18.
-- **Schroff, Kalenichenko, Philbin, *FaceNet: A Unified Embedding for Face Recognition and Clustering*** (CVPR 2015). https://arxiv.org/abs/1503.03832 - Triplet-loss metric learning that defined the modern recipe.
+- **Schroff, Kalenichenko, Philbin, *FaceNet: A Unified Embedding for Face Recognition and Clustering*** (CVPR 2015). https://arxiv.org/abs/1503.03832 - Triplet-loss metric learning that defined the modern experiment.
 - **Lee et al., *Set Transformer*** (ICML 2019). https://arxiv.org/abs/1810.00825 - Permutation-invariant transformer over sets via inducing-point attention; useful for variable-length step curves.
 - **Zaheer et al., *Deep Sets*** (NeurIPS 2017). https://arxiv.org/abs/1703.06114 - Theoretical foundation: any permutation-invariant function decomposes as `ρ(Σ φ(x))`.
 - **Huang et al., *Learning Deep Structured Semantic Models for Web Search using Clickthrough Data (DSSM)*** (CIKM 2013). https://www.microsoft.com/en-us/research/publication/learning-deep-structured-semantic-models-for-web-search-using-clickthrough-data/ - Two-tower bi-encoder retrieval; pattern reused everywhere in modern dense retrieval.
-- **Nogueira, Yang, Cho, Lin, *Multi-Stage Document Ranking with BERT*** (2019). https://arxiv.org/abs/1910.14424 - Retrieve-then-rerank with a cross-encoder; the recipe behind almost every modern IR system.
+- **Nogueira, Yang, Cho, Lin, *Multi-Stage Document Ranking with BERT*** (2019). https://arxiv.org/abs/1910.14424 - Retrieve-then-rerank with a cross-encoder; the experiment behind almost every modern IR system.
 
 ## Wasserstein / optimal-transport autoencoders
 

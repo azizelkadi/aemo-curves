@@ -1,6 +1,6 @@
 """Predict strategies that wrap one estimator: fit on train, predict on test.
 
-Each registered name maps to an estimator class. The recipe `predict.params`
+Each registered name maps to an estimator class. The experiment `predict.params`
 are the estimator's constructor arguments. Heavy backends are imported inside
 their adapter so they load only when the strategy runs.
 """
@@ -45,7 +45,7 @@ from aemo_curves.stages.predict.soft_knn import (
 
 def _build(cls, ctx: PredictContext, params: dict):
     """Instantiate `cls`, forwarding the context's exogenous provider when the
-    estimator accepts one and the recipe did not set it explicitly."""
+    estimator accepts one and the experiment did not set it explicitly."""
     params = dict(params)
     if ctx.exog_provider is not None and "exog_provider" not in params:
         if "exog_provider" in inspect.signature(cls).parameters:

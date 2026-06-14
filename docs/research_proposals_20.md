@@ -137,7 +137,7 @@ Status: this plan was carried out, see the experiment folders under [`experiment
 
 ### #7. Monotonic autoencoder + Echo-State forecast (Sinha-Lucheroni style)
 
-**Methodology**: Decompose each curve into anchor points `A_t` (low end), `B_t` (high end), and interior monotone segment `C_t`. Train a monotonic autoencoder on `C_t` (positive-weight or cumulative-softmax decoder guarantees non-decreasing reconstruction). Forecast `A_t`, `B_t` with an Echo State Network using calendar+lag features; forecast the latent of `C_t` with a second ESN. Recompose to a guaranteed-monotone forecast. This is the Sinha & Lucheroni (2025) recipe.
+**Methodology**: Decompose each curve into anchor points `A_t` (low end), `B_t` (high end), and interior monotone segment `C_t`. Train a monotonic autoencoder on `C_t` (positive-weight or cumulative-softmax decoder guarantees non-decreasing reconstruction). Forecast `A_t`, `B_t` with an Echo State Network using calendar+lag features; forecast the latent of `C_t` with a second ESN. Recompose to a guaranteed-monotone forecast. This is the Sinha & Lucheroni (2025) experiment.
 
 **Model / implementation**: Monotonic AE (~2k params, 16-d bottleneck) + `pyESN` / `reservoirpy`. ~2 h training; microseconds inference.
 

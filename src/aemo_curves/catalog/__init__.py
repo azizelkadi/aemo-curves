@@ -1,7 +1,7 @@
 """The catalog: one output contract per stage, in one place.
 
 Every stage writes a frame that matches its contract here. The runner validates
-each stage output against these, so a recipe whose strategies disagree on shape
+each stage output against these, so an experiment whose strategies disagree on shape
 fails before the result is logged.
 """
 from aemo_curves.core.contracts import Column, Contract, is_array_like

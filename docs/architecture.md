@@ -1,12 +1,12 @@
-# Architecture: stages, strategies, recipes
+# Architecture: stages, strategies, experiments
 
 This project runs one kind of job: take the bid and offer history of the STEM
 market and predict the next supply or demand curve, then score the prediction.
 The code is organised so that this job is a short pipeline of **stages**, each
 stage has several interchangeable **strategies**, and a single experiment is a
-small **recipe** that picks one strategy per stage.
+small YAML file that picks one strategy per stage.
 
-The goal is that adding an experiment means writing a recipe, adding a method
+The goal is that adding an experiment means writing an experiment, adding a method
 means writing one strategy, and changing the metric or the data range means
 editing one line. Results stay comparable because every experiment writes the
 same output shape and is scored by the same evaluate stage.
@@ -49,7 +49,7 @@ flowing on.
 
 Strategies live under `src/aemo_curves/stages/<stage>/`. Importing a stage
 package registers its strategies in the registry (`core/registry.py`) under that
-stage name. A recipe names a strategy; the runner looks it up.
+stage name. An experiment names a strategy; the runner looks it up.
 
 A **predict** strategy is a callable:
 
@@ -69,13 +69,13 @@ predictions contract.
 An **evaluate** strategy is a `Metric` (name plus a curve-distance function).
 Three are registered: `wasserstein` (default), `dtw`, `hc_mae`.
 
-## Recipes
+## Experiments
 
-A recipe is a small YAML file under `recipes/<group>/<name>.yaml`. It names one
+An experiment is a small YAML file under `experiments/<group>/<name>.yaml`. It names one
 strategy per stage plus the parameters and the data version.
 
 ```yaml
-name: horizon_1d.ridge_retrieval
+name: demand_7d.vgrid_rolling_ridge
 description: Per-interval Ridge on lagged embeddings, mapped to the nearest curve.
 data:
   side: supply
@@ -98,12 +98,12 @@ params:                  # optional extra fields logged to MLflow
   track: horizon_1d
 ```
 
-Recipes in the same group share a data block, a metric, and a baseline, so only
+Experiments in the same group share a data block, a metric, and a baseline, so only
 same-group results are directly comparable.
 
 ## The runner
 
-`runner.run_recipe(recipe)` does the per-experiment stages in order:
+`runner.run_experiment(experiment)` does the per-experiment stages in order:
 
 1. resolve the feature tables for the data block (`core.datasets.load_features`),
 2. run the predict strategy, validate against the predictions contract,
@@ -111,11 +111,11 @@ same-group results are directly comparable.
    validate against the scores contract,
 4. return an `ExperimentResult` and log it to MLflow.
 
-Run one recipe from the command line:
+Run one experiment from the command line:
 
 ```bash
-uv run python scripts/run_experiment.py horizon_1d.ridge_retrieval
-uv run python scripts/run_experiment.py horizon_1d.ridge_retrieval --no-mlflow
+uv run python scripts/run_experiment.py demand_7d.vgrid_rolling_ridge
+uv run python scripts/run_experiment.py demand_7d.vgrid_rolling_ridge --no-mlflow
 ```
 
 For a fast logic check on a few test days (not a real evaluation), pass a
@@ -126,14 +126,14 @@ subset, for example `--subset-days 3`.
 The data block pins the inputs. `side` is `supply` or `demand`. `features` is
 `interp` (64-d), `v_grid`, or `kmedoids`. `split` is `canonical` (train
 2021-01..2024-04, test 2024-05..2025-05) or a recut listed in
-`config.SPLITS` (for example `user2024`). Two recipes with the same data block
+`config.SPLITS` (for example `user2024`). Two experiments with the same data block
 read byte-identical tables.
 
 ## Directory layout
 
 ```
 src/aemo_curves/
-  core/        contracts, registry, recipe, datasets, predictor base, metric base, result
+  core/        contracts, registry, experiment, datasets, predictor base, metric base, result
   catalog/     one contract per stage
   stages/
     load/      months -> auction rows
@@ -141,24 +141,24 @@ src/aemo_curves/
     features/  curves -> embeddings (interp, v_grid, kmedoids)
     predict/   feature tables -> predictions (the models)
     evaluate/  predictions -> scores (the metrics)
-  runner/      run a recipe end to end
+  runner/      run an experiment end to end
   analysis/    post-hoc comparison and statistics across runs
   exogenous/   optional weather and demand-forecast features
   tracking/    MLflow helpers
   viz/         comparison and curve plots
   config.py    paths, the canonical split, the split registry
-recipes/        one folder per comparable group, one YAML per experiment
-scripts/        build the cached stages, run a recipe, compare runs
-tests/          contract, smoke, and recipe-check tests
+experiments/        one folder per comparable group, one YAML per experiment
+scripts/        build the cached stages, run an experiment, compare runs
+tests/          contract, smoke, and experiment-check tests
 ```
 
 ## Adding things
 
-- **A new experiment**: add `recipes/<group>/<name>.yaml` naming existing
+- **A new experiment**: add `experiments/<group>/<name>.yaml` naming existing
   strategies. No code.
 - **A new method**: add a strategy under `stages/predict/`, register it, then
-  write a recipe that uses it.
+  write an experiment that uses it.
 - **A new metric**: add a `Metric` under `stages/evaluate/`, register it, then
-  set `evaluate.metric` in a recipe.
+  set `evaluate.metric` in an experiment.
 - **A new data range**: add an entry to `config.SPLITS`, then set
-  `data.split` in a recipe.
+  `data.split` in an experiment.

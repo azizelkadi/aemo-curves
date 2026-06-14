@@ -1,0 +1,22 @@
+name: demand_7d.same_weekday_avg
+description: 'Best learning-free method: average of recent same-weekday curves.'
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: same_weekday_avg
+  params:
+    lags:
+    - 7
+    - 14
+    - 21
+    - 28
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Best learning-free method: average of recent same-weekday curves.'

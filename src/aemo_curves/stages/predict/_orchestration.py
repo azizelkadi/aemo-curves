@@ -1,6 +1,6 @@
 """Predict strategies that do more than wrap one estimator.
 
-`static_retrieval` is a fit-once stratified k=1 retrieval at the recipe's lag.
+`static_retrieval` is a fit-once stratified k=1 retrieval at the experiment's lag.
 `rolling_refit` re-fits that retrieval at the start of every test month on data
 old enough to respect the forecast horizon, then concatenates the per-window
 predictions. Both return predictions only; the runner scores them.

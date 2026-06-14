@@ -6,7 +6,7 @@ wholesale electricity market, one day ahead (and at longer horizons too).
 
 The work is organised as a short pipeline of **stages**, each with a fixed
 output shape, several interchangeable **strategies** per stage, and one small
-**recipe** per experiment that picks a strategy for each stage. See
+**experiment** (a YAML file) that picks one strategy for each stage. See
 [`docs/architecture.md`](docs/architecture.md) for the full design.
 
 ---
@@ -43,22 +43,22 @@ see [`data/external/README.md`](data/external/README.md).
 
 Both windows are defined in [`config.py`](src/aemo_curves/config.py). Alternative
 recuts (for example `user2024`) live in `config.SPLITS` and are selected per
-experiment in the recipe's data block. Recipes in the same group share a data
+experiment in the experiment's data block. Experiments in the same group share a data
 block, a metric, and a baseline, so only same-group results are comparable.
 
 ## Metrics
 
 Three curve-distance metrics are available, each a `Metric` registered in
-[`stages/evaluate`](src/aemo_curves/stages/evaluate/__init__.py). A recipe sets
+[`stages/evaluate`](src/aemo_curves/stages/evaluate/__init__.py). An experiment sets
 `evaluate.metric`:
 
 | Metric | Name | Typical use |
 |--------|------|-------------|
-| Wasserstein (default) | `wasserstein` | most groups |
-| Dynamic time warping | `dtw` | the prototype (kmedoids) groups |
-| Horizontal-cut MAE | `hc_mae` | the v_grid and demand HC-MAE groups |
+| Wasserstein (default) | `wasserstein` | available |
+| Dynamic time warping | `dtw` | available |
+| Horizontal-cut MAE | `hc_mae` | the supply_7d and demand_7d groups |
 
-Every run is scored against a baseline (the recipe's `evaluate.baseline`,
+Every run is scored against a baseline (the experiment's `evaluate.baseline`,
 usually the lag curve at the forecast horizon) on the exact same test rows, so
 deltas are apples-to-apples.
 
@@ -75,19 +75,19 @@ phd/
 |- artifacts/                      # cached curves & embeddings (git-ignored)
 |- mlruns/                         # local MLflow store (git-ignored)
 |- src/aemo_curves/
-|  |- core/        # contracts, registry, recipe, datasets, the three bases
+|  |- core/        # contracts, registry, experiment, datasets, the three bases
 |  |- catalog/     # one output contract per stage
 |  |- stages/      # load, curves, features, predict, evaluate (the strategies)
-|  |- runner/      # run a recipe end to end
+|  |- runner/      # run an experiment end to end
 |  |- analysis/    # comparison and significance tests across runs
 |  |- exogenous/   # optional weather / demand-forecast features
 |  |- tracking/    # MLflow helpers
 |  |- viz/         # comparison and curve plots
 |  |- config.py    # paths, the canonical split, the split registry
 |  \- cli.py       # aemo-run entry point
-|- recipes/        # one folder per comparable group, one YAML per experiment
-|- scripts/        # build the cached stages, run a recipe, compare runs
-\- tests/          # contract, smoke, and recipe-check tests
+|- experiments/        # one folder per comparable group, one YAML per experiment
+|- scripts/        # build the cached stages, run an experiment, compare runs
+\- tests/          # contract, smoke, and experiment-check tests
 ```
 
 ## Quickstart
@@ -103,31 +103,27 @@ uv pip install -e .
 
 ### 2. Build cached stages (once)
 
-You need the real monthly CSVs under `data/` first. Then build the side you
-want:
+You need the real monthly CSVs under `data/` first. The current groups use the
+`v_grid` embedding (and the `interp` embedding for the exogenous proxy
+features), so build curves and both embeddings for each side:
 
 ```bash
-uv run python scripts/build_curves.py --side supply
+uv run python scripts/build_curves.py --side both
 uv run python scripts/build_embeddings.py --side supply
-```
-
-For demand pass `--side demand`. Some groups need extra tables:
-
-```bash
+uv run python scripts/build_embeddings.py --side demand
+uv run python scripts/build_v_grid_embeddings.py --side supply
 uv run python scripts/build_v_grid_embeddings.py --side demand
-uv run python scripts/build_kmedoids.py --side demand --k 24 --sample 480 --window 10
-uv run python scripts/build_kmedoids_embeddings.py --side demand --k 24 --window 10 --jobs 8
 ```
 
 ### 3. Run an experiment
 
-Experiments are recipes at `recipes/<group>/<name>.yaml`. Run one by its dotted
+Experiments live at `experiments/<group>/<name>.yaml`. Run one by its dotted
 `<group>.<name>`:
 
 ```bash
-uv run python scripts/run_experiment.py horizon_1d.baseline_lag1
-uv run python scripts/run_experiment.py vgrid_7d_demand.rolling_ridge_vgrid --no-mlflow
-uv run python scripts/run_experiment.py dtw_kmedoids.oracle_kmedoids --subset-days 3
+uv run python scripts/run_experiment.py demand_7d.baseline_lag7
+uv run python scripts/run_experiment.py demand_7d.vgrid_rolling_ridge_exog --no-mlflow
+uv run python scripts/run_experiment.py supply_7d.vgrid_strat_knn --subset-days 3
 ```
 
 `--no-mlflow` skips logging; `--subset-days N` runs only the first N test days
@@ -144,10 +140,10 @@ uv run aemo-run ui          # -> http://localhost:5000
 
 ## Adding things
 
-- **A new experiment**: add `recipes/<group>/<name>.yaml` naming existing
+- **A new experiment**: add `experiments/<group>/<name>.yaml` naming existing
   strategies. No code.
 - **A new method**: add a strategy under `src/aemo_curves/stages/predict/`,
-  register it with `@register("predict", "<name>")`, then write a recipe.
+  register it with `@register("predict", "<name>")`, then write an experiment.
 - **A new metric**: add a `Metric` under `stages/evaluate/`, register it, then
   set `evaluate.metric`.
 - **A new data range**: add an entry to `config.SPLITS`, then set `data.split`.

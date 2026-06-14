@@ -8,28 +8,28 @@ from pathlib import Path
 
 import pytest
 
-from aemo_curves.core.recipe import Recipe
-from aemo_curves.runner import run_recipe
+from aemo_curves.core.experiment import Experiment
+from aemo_curves.runner import run_experiment
 
 REPO = Path(__file__).resolve().parents[1]
 SUBSET = {"test_days": 2, "max_train": 4000}
 
-RECIPES = [
-    "horizon_1d/baseline_lag1.yaml",
-    "horizon_1d/ridge_retrieval.yaml",
+EXPERIMENTS = [
+    "demand_7d/baseline_lag7.yaml",
+    "demand_7d/same_weekday_avg.yaml",
 ]
 
 
 def _artifacts_ready() -> bool:
-    return (REPO / "artifacts" / "embeddings" / "train_supply.pkl").exists()
+    return (REPO / "artifacts" / "embeddings" / "test_v_grid_demand.pkl").exists()
 
 
 @pytest.mark.skipif(not _artifacts_ready(), reason="cached embeddings not built")
-@pytest.mark.parametrize("rel", RECIPES)
+@pytest.mark.parametrize("rel", EXPERIMENTS)
 def test_runner_smoke(rel):
-    recipe = Recipe.from_yaml(REPO / "recipes" / rel)
-    result = run_recipe(recipe, log_to_mlflow=False, subset=SUBSET)
+    experiment = Experiment.from_yaml(REPO / "experiments" / rel)
+    result = run_experiment(experiment, log_to_mlflow=False, subset=SUBSET)
     assert result.metrics["n"] > 0
-    assert recipe.metric + "_mean" in result.metrics
+    assert experiment.metric + "_mean" in result.metrics
     cols = set(result.predictions.columns)
-    assert {"pred_curve_qty", "pred_curve_price", f"curve_{recipe.metric}"} <= cols
+    assert {"pred_curve_qty", "pred_curve_price", f"curve_{experiment.metric}"} <= cols

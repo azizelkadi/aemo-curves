@@ -1,4 +1,4 @@
-"""Build an ExogenousProvider from a recipe's small `exog` spec.
+"""Build an ExogenousProvider from an experiment's small `exog` spec.
 
 The spec lists which sources to combine, for example
 `{"sources": ["proxy"]}` or `{"sources": ["proxy", "weather"]}`. The proxy

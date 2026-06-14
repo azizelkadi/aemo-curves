@@ -1,6 +1,6 @@
 """Evaluate stage: score a predictions frame under a curve-distance metric.
 
-Each metric is registered as an evaluate strategy. A recipe names one of them;
+Each metric is registered as an evaluate strategy. An experiment names one of them;
 the runner scores the predictions, scores the baseline on the same rows, and
 summarises the gap.
 """

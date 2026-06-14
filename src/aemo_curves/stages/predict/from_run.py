@@ -2,7 +2,7 @@
 
 Used to rescore an existing experiment under a different metric: the strategy
 returns the stored true and predicted curves, and the runner scores them with
-the recipe's metric and baseline.
+the experiment's metric and baseline.
 """
 from __future__ import annotations
 
