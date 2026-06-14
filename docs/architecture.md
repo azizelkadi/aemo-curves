@@ -71,35 +71,35 @@ Three are registered: `wasserstein` (default), `dtw`, `hc_mae`.
 
 ## Experiments
 
-An experiment is a small YAML file under `experiments/<group>/<name>.yaml`. It names one
+An experiment is a small YAML file under `experiments/<side>/<horizon>/<metric>/<family>/<name>.yaml`. It names one
 strategy per stage plus the parameters and the data version.
 
 ```yaml
-name: demand_7d.vgrid_rolling_ridge
-description: Per-interval Ridge on lagged embeddings, mapped to the nearest curve.
+name: demand.7d.hc_mae.vgrid.rolling_ridge
+description: v_grid retrieval, rolling monthly ridge refit.
 data:
-  side: supply
-  features: interp      # interp | v_grid | kmedoids
+  side: demand          # supply | demand
+  features: v_grid      # interp | v_grid | kmedoids
   split: canonical      # canonical | user2024
-  lag_days: 1
+  lag_days: 7
 predict:
-  strategy: ridge_retrieval
-  params:
-    lags: [1, 2, 7, 14]
-    alpha: 2.0
-    n_pca: 20
+  strategy: rolling_refit
+  params: {query: ridge, ridge_alpha: 200.0, ridge_n_pca: 20}
 evaluate:
-  metric: wasserstein    # wasserstein | dtw | hc_mae
+  metric: hc_mae        # wasserstein | dtw | hc_mae
   baseline:
     strategy: lag1
-    params: {lag_days: 1}
+    params: {lag_days: 7}
 notes: "..."
-params:                  # optional extra fields logged to MLflow
-  track: horizon_1d
+params:                 # optional extra fields logged to MLflow
+  exog: {sources: [proxy, weather]}   # only when the strategy uses exogenous features
 ```
 
-Experiments in the same group share a data block, a metric, and a baseline, so only
-same-group results are directly comparable.
+The path encodes the comparable group: every experiment under one
+`experiments/<side>/<horizon>/<metric>/` folder shares the side, the horizon (so
+the same lag baseline), and the metric, so their results are directly
+comparable. The dotted name is just that path with dots, and the file's
+`evaluate.metric` must match its `<metric>` folder.
 
 ## The runner
 
@@ -114,12 +114,39 @@ same-group results are directly comparable.
 Run one experiment from the command line:
 
 ```bash
-uv run python scripts/run_experiment.py demand_7d.vgrid_rolling_ridge
-uv run python scripts/run_experiment.py demand_7d.vgrid_rolling_ridge --no-mlflow
+uv run python scripts/run_experiment.py demand.7d.hc_mae.vgrid.rolling_ridge
+uv run python scripts/run_experiment.py demand.7d.hc_mae.vgrid.rolling_ridge --no-mlflow
 ```
 
 For a fast logic check on a few test days (not a real evaluation), pass a
 subset, for example `--subset-days 3`.
+
+## Running a group
+
+A group is one `experiments/<side>/<horizon>/<metric>/` folder. `run_group`
+runs every experiment under it (across all family sub-folders), checks that they
+share the side, horizon, metric, and baseline, and returns a leaderboard ranked
+by the metric. This is the main way to produce a comparison.
+
+```bash
+uv run python scripts/run_group.py demand.7d.hc_mae
+```
+
+Results are cached under `artifacts/cache/` (git-ignored). The cache key is the
+hash of an experiment's result-affecting definition (data block, predict,
+evaluate, exogenous spec) plus a fingerprint (size and modification time) of the
+input tables it reads, plus a cache version. So:
+
+- Re-running a group recomputes nothing that has not changed; adding one
+  experiment computes only that one.
+- Rebuilding a cached embedding table invalidates only the experiments that read
+  it.
+- Editing a hyperparameter invalidates only that experiment.
+
+Strategy code changes are not tracked. After changing a strategy's code, run
+`scripts/run_group.py ... --no-cache` or clear the cache (`rm -rf
+artifacts/cache`); bump `CACHE_VERSION` in `runner/cache.py` to invalidate every
+entry at once.
 
 ## Data versions
 
@@ -147,14 +174,14 @@ src/aemo_curves/
   tracking/    MLflow helpers
   viz/         comparison and curve plots
   config.py    paths, the canonical split, the split registry
-experiments/        one folder per comparable group, one YAML per experiment
+experiments/        <side>/<horizon>/<metric>/<family>/<name>.yaml; a side+horizon+metric is a comparable group
 scripts/        build the cached stages, run an experiment, compare runs
 tests/          contract, smoke, and experiment-check tests
 ```
 
 ## Adding things
 
-- **A new experiment**: add `experiments/<group>/<name>.yaml` naming existing
+- **A new experiment**: add `experiments/<side>/<horizon>/<metric>/<family>/<name>.yaml` naming existing
   strategies. No code.
 - **A new method**: add a strategy under `stages/predict/`, register it, then
   write an experiment that uses it.

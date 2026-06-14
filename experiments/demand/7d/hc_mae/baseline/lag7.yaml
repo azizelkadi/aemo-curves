@@ -1,7 +1,7 @@
-name: supply_7d.baseline_lag7
+name: demand.7d.hc_mae.baseline.lag7
 description: 'Lag-7 baseline: the curve at the same interval seven days earlier.'
 data:
-  side: supply
+  side: demand
   features: v_grid
   split: canonical
   lag_days: 7

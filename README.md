@@ -56,7 +56,7 @@ Three curve-distance metrics are available, each a `Metric` registered in
 |--------|------|-------------|
 | Wasserstein (default) | `wasserstein` | available |
 | Dynamic time warping | `dtw` | available |
-| Horizontal-cut MAE | `hc_mae` | the supply_7d and demand_7d groups |
+| Horizontal-cut MAE | `hc_mae` | the supply/7d and demand/7d groups |
 
 Every run is scored against a baseline (the experiment's `evaluate.baseline`,
 usually the lag curve at the forecast horizon) on the exact same test rows, so
@@ -93,7 +93,7 @@ phd/
 |  |- viz/         # comparison and curve plots
 |  |- config.py    # paths, the canonical split, the split registry
 |  \- cli.py       # aemo-run entry point
-|- experiments/        # one folder per comparable group, one YAML per experiment
+|- experiments/    # <side>/<horizon>/<metric>/<family>/<name>.yaml (a side+horizon+metric is a comparable group)
 |- scripts/        # build the cached stages, run an experiment, compare runs
 \- tests/          # contract, smoke, and experiment-check tests
 ```
@@ -125,20 +125,37 @@ uv run python scripts/build_v_grid_embeddings.py --side demand
 
 ### 3. Run an experiment
 
-Experiments live at `experiments/<group>/<name>.yaml`. Run one by its dotted
-`<group>.<name>`:
+Experiments live at `experiments/<side>/<horizon>/<metric>/<family>/<name>.yaml`. Run one by its dotted
+`<side>.<horizon>.<metric>.<family>.<name>`:
 
 ```bash
-uv run python scripts/run_experiment.py demand_7d.baseline_lag7
-uv run python scripts/run_experiment.py demand_7d.vgrid_rolling_ridge_exog --no-mlflow
-uv run python scripts/run_experiment.py supply_7d.vgrid_strat_knn --subset-days 3
+uv run python scripts/run_experiment.py demand.7d.hc_mae.baseline.lag7
+uv run python scripts/run_experiment.py demand.7d.hc_mae.vgrid.rolling_ridge_exog --no-mlflow
+uv run python scripts/run_experiment.py supply.7d.hc_mae.vgrid.strat_knn --subset-days 3
 ```
 
 `--no-mlflow` skips logging; `--subset-days N` runs only the first N test days
 for a fast logic check. Each run logs params, metrics, and the predictions to a
 local MLflow run under `mlruns/`.
 
-### 4. Browse results
+### 4. Run and compare a whole group (main entrypoint)
+
+A group is one `experiments/<side>/<horizon>/<metric>/` folder. Everything under
+it is comparable, so the group runner runs them all and prints a leaderboard
+ranked by the metric:
+
+```bash
+uv run python scripts/run_group.py demand.7d.hc_mae
+```
+
+Results are cached under `artifacts/cache/`. Re-running a group recomputes only
+what changed, so after adding one experiment the same command computes only the
+new one and reuses the rest. Use `--no-cache` to force a full recompute (do this
+after changing strategy code), `--subset-days N` for a fast check, and `--save
+results.csv` to write the leaderboard. The same is available as `aemo-run group
+demand.7d.hc_mae`.
+
+### 5. Browse results
 
 ```bash
 uv run python scripts/compare_experiments.py list
@@ -148,7 +165,7 @@ uv run aemo-run ui          # -> http://localhost:5000
 
 ## Adding things
 
-- **A new experiment**: add `experiments/<group>/<name>.yaml` naming existing
+- **A new experiment**: add `experiments/<side>/<horizon>/<metric>/<family>/<name>.yaml` naming existing
   strategies. No code.
 - **A new method**: add a strategy under `src/aemo_curves/stages/predict/`,
   register it with `@register("predict", "<name>")`, then write an experiment.

@@ -17,7 +17,9 @@ def test_experiments_exist():
     assert EXPERIMENTS, "no experiments found under experiments/"
 
 
-@pytest.mark.parametrize("path", EXPERIMENTS, ids=[p.stem for p in EXPERIMENTS])
+@pytest.mark.parametrize(
+    "path", EXPERIMENTS, ids=[str(p.relative_to(REPO / "experiments")) for p in EXPERIMENTS]
+)
 def test_experiment_resolves(path):
     bootstrap()
     experiment = Experiment.from_yaml(path)

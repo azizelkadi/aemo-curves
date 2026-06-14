@@ -1,8 +1,8 @@
-name: supply_7d.vgrid_oracle
+name: demand.7d.hc_mae.vgrid.oracle
 description: 'Oracle ceiling: closest train curve to the true curve in the (interval,
   day-of-week) bucket.'
 data:
-  side: supply
+  side: demand
   features: v_grid
   split: canonical
   lag_days: 7

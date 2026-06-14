@@ -40,7 +40,7 @@ experiment is an experiment that picks one strategy per stage. See
   `stages/evaluate` - the strategies. Importing a stage package registers its
   strategies.
 - `runner/` - `run_experiment` runs an experiment end to end.
-- `experiments/<group>/<name>.yaml` - the experiments.
+- `experiments/<side>/<horizon>/<metric>/<family>/<name>.yaml` - the experiments.
 
 ### Output contracts (the catalog)
 
@@ -69,15 +69,28 @@ rows, so deltas are apples-to-apples.
 Run one experiment by its dotted name:
 
 ```bash
-uv run python scripts/run_experiment.py demand_7d.baseline_lag7
-uv run python scripts/run_experiment.py demand_7d.vgrid_rolling_ridge --no-mlflow
-uv run python scripts/run_experiment.py demand_7d.vgrid_rolling_ridge --subset-days 3
+uv run python scripts/run_experiment.py demand.7d.hc_mae.baseline.lag7
+uv run python scripts/run_experiment.py demand.7d.hc_mae.vgrid.rolling_ridge --no-mlflow
+uv run python scripts/run_experiment.py demand.7d.hc_mae.vgrid.rolling_ridge --subset-days 3
 ```
 
 `--subset-days N` runs only the first N test days for a fast logic check.
 
-- **New experiment**: add `experiments/<group>/<name>.yaml` naming existing
-  strategies. No code.
+Run and rank a whole comparable group (one `<side>/<horizon>/<metric>` folder).
+This is the main entrypoint for producing a comparison:
+
+```bash
+uv run python scripts/run_group.py demand.7d.hc_mae          # ranked leaderboard
+uv run python scripts/run_group.py demand.7d.hc_mae --no-cache
+```
+
+Group runs are cached under `artifacts/cache/` (key = the experiment's
+result-affecting definition plus a fingerprint of the tables it reads). So
+re-running a group recomputes only what changed: add one experiment and only it
+runs. After changing strategy *code*, use `--no-cache` or clear the cache.
+
+- **New experiment**: add `experiments/<side>/<horizon>/<metric>/<family>/<name>.yaml` naming existing
+  strategies. No code. Its `evaluate.metric` must match the `<metric>` folder.
 - **New method**: add a strategy under `stages/predict/`, register it with
   `@register("predict", "<name>")`, then write an experiment that uses it.
 - **New metric**: add a `Metric` under `stages/evaluate/`, register it, then set

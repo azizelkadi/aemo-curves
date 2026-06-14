@@ -1,12 +1,12 @@
-"""Run one experiment by its dotted <group>.<name>.
+"""Run one experiment by its dotted <side>.<horizon>.<family>.<name>.
 
 Usage:
-    uv run python scripts/run_experiment.py horizon_1d.baseline_lag1
-    uv run python scripts/run_experiment.py horizon_1d.ridge_retrieval --no-mlflow
-    uv run python scripts/run_experiment.py horizon_1d.ridge_retrieval --subset-days 3
+    uv run python scripts/run_experiment.py demand.7d.baseline.lag7
+    uv run python scripts/run_experiment.py demand.7d.vgrid.rolling_ridge_exog --no-mlflow
+    uv run python scripts/run_experiment.py supply.7d.vgrid.strat_knn --subset-days 3
 
-An experiment lives at experiments/<group>/<name>.yaml. --subset-days runs only the first
-N test days for a fast logic check (not a real evaluation).
+The dotted name maps to experiments/<side>/<horizon>/<family>/<name>.yaml.
+--subset-days runs only the first N test days for a fast logic check.
 """
 from __future__ import annotations
 
@@ -26,15 +26,16 @@ log = logging.getLogger(__name__)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run an experiment by its dotted <group>.<name>.")
-    parser.add_argument("name", help="Experiment, e.g. 'horizon_1d.baseline_lag1'")
+    parser = argparse.ArgumentParser(
+        description="Run an experiment by its dotted <side>.<horizon>.<family>.<name>."
+    )
+    parser.add_argument("name", help="Experiment, e.g. 'demand.7d.vgrid.rolling_ridge_exog'")
     parser.add_argument("--no-mlflow", action="store_true", help="Skip MLflow logging")
     parser.add_argument("--subset-days", type=int, default=None,
                         help="Run only the first N test days (fast logic check)")
     args = parser.parse_args()
 
-    group, _, name = args.name.partition(".")
-    path = REPO / "experiments" / group / f"{name}.yaml"
+    path = (REPO / "experiments").joinpath(*args.name.split(".")).with_suffix(".yaml")
     if not path.exists():
         parser.error(f"No experiment at {path}")
 

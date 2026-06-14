@@ -44,12 +44,11 @@ def build_embeddings(side: str = "supply") -> None:
 
 @app.command("run")
 def run(name: str, mlflow: bool = True, subset_days: int = 0) -> None:
-    """Run an experiment by its dotted name: e.g. `aemo-run run horizon_1d.baseline_lag1`."""
+    """Run an experiment by its dotted name: e.g. `aemo-run run demand.7d.vgrid.rolling_ridge_exog`."""
     from .core.experiment import Experiment
     from .runner import run_experiment
 
-    group, _, experiment_name = name.partition(".")
-    path = PROJECT_ROOT / "experiments" / group / f"{experiment_name}.yaml"
+    path = PROJECT_ROOT.joinpath("experiments", *name.split(".")).with_suffix(".yaml")
     if not path.exists():
         raise typer.BadParameter(f"No experiment at {path}")
     subset = {"test_days": subset_days} if subset_days else None
@@ -57,6 +56,17 @@ def run(name: str, mlflow: bool = True, subset_days: int = 0) -> None:
     print(f"\n=== {res.experiment_name} ===")
     for k, v in res.metrics.items():
         print(f"  {k}: {v}")
+
+
+@app.command("group")
+def group(name: str, cache: bool = True, mlflow: bool = True, subset_days: int = 0) -> None:
+    """Run a comparable group and rank it: e.g. `aemo-run group demand.7d.hc_mae`."""
+    from .runner import run_group
+
+    subset = {"test_days": subset_days} if subset_days else None
+    table = run_group(name, use_cache=cache, log_to_mlflow=mlflow, subset=subset)
+    print(f"\n=== {name} (lower is better) ===")
+    print(table.to_string(index=False))
 
 
 @app.command()

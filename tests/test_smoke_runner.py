@@ -15,8 +15,8 @@ REPO = Path(__file__).resolve().parents[1]
 SUBSET = {"test_days": 2, "max_train": 4000}
 
 EXPERIMENTS = [
-    "demand_7d/baseline_lag7.yaml",
-    "demand_7d/same_weekday_avg.yaml",
+    "demand/7d/hc_mae/baseline/lag7.yaml",
+    "demand/7d/hc_mae/weekly/same_weekday_avg.yaml",
 ]
 
 

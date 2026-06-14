@@ -1,4 +1,4 @@
-name: supply_7d.vgrid_rolling_ridge
+name: supply.7d.hc_mae.vgrid.rolling_ridge
 description: v_grid retrieval, rolling monthly ridge refit.
 data:
   side: supply

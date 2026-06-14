@@ -1,7 +1,7 @@
-name: supply_7d.vgrid_strat_knn
+name: demand.7d.hc_mae.vgrid.strat_knn
 description: v_grid retrieval, static k=1 ridge query (fit once on train).
 data:
-  side: supply
+  side: demand
   features: v_grid
   split: canonical
   lag_days: 7

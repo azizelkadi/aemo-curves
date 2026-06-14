@@ -1,8 +1,8 @@
-name: supply_7d.vgrid_rolling_ridge_exog
+name: demand.7d.hc_mae.vgrid.rolling_ridge_exog
 description: 'Champion: v_grid retrieval, rolling ridge refit, with proxy and weather
   exogenous features.'
 data:
-  side: supply
+  side: demand
   features: v_grid
   split: canonical
   lag_days: 7

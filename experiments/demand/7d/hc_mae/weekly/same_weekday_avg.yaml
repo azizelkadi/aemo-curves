@@ -1,4 +1,4 @@
-name: demand_7d.same_weekday_avg
+name: demand.7d.hc_mae.weekly.same_weekday_avg
 description: 'Best learning-free method: average of recent same-weekday curves (interp
   embedding).'
 data:

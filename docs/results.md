@@ -1,6 +1,6 @@
 # Results: 7-day-ahead curves under HC-MAE
 
-The two experiment groups in this repo (`supply_7d`, `demand_7d`), scored on the
+The two experiment groups in this repo (`supply/7d`, `demand/7d`), scored on the
 full test window. Reproduced end to end with the current code.
 
 ## Setup
@@ -59,10 +59,10 @@ week, so last week's curve is hard to improve on.
 ## Reproduce
 
 ```bash
-uv run python scripts/run_experiment.py demand_7d.vgrid_rolling_ridge_exog
+uv run python scripts/run_experiment.py demand.7d.hc_mae.vgrid.rolling_ridge_exog
 ```
 
-`supply_7d` needs the supply v_grid tables first:
+`supply/7d` needs the supply v_grid tables first:
 
 ```bash
 uv run python scripts/build_v_grid_embeddings.py --side supply
