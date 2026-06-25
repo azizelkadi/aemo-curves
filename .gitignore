@@ -32,6 +32,9 @@ docs/*.pdf
 # Scratch space and third-party seed material (not for publication)
 pad/
 
+# Local agent instruction files (CLAUDE.md, AGENTS.md)
+agent-docs/
+
 # Repo-local SSH key + GitHub config (never commit, never global)
 .local/
 
