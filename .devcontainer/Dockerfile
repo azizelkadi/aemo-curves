@@ -18,6 +18,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.7.6 /uv /uvx /usr/local/bin/
 # System packages: git, build tools, and the bits NodeSource needs.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
+        openssh-client \
         curl \
         ca-certificates \
         gnupg \

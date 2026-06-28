@@ -17,7 +17,11 @@
 
   "containerEnv": {
     "UV_PROJECT_ENVIRONMENT": "/opt/venv",
-    "MLFLOW_TRACKING_URI": "file:///workspaces/phd/mlruns"
+    "MLFLOW_TRACKING_URI": "file:///workspaces/phd/mlruns",
+    // Mirror the repo-local SSH setup from .git/config (core.sshCommand) using
+    // the in-container path to the bind-mounted key. Overrides core.sshCommand
+    // inside the container only; the host config is untouched, nothing global.
+    "GIT_SSH_COMMAND": "ssh -i /workspaces/phd/.local/github/id_ed25519 -o IdentitiesOnly=yes -F /dev/null -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/workspaces/phd/.local/github/known_hosts"
   },
 
   "forwardPorts": [5000],
