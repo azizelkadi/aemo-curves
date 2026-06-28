@@ -1,0 +1,47 @@
+{
+  "name": "aemo-curves",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "workspaceFolder": "/workspaces/phd",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/phd,type=bind,consistency=cached",
+  "remoteUser": "vscode",
+
+  // The Python environment lives in a named volume, not in the bind-mounted
+  // .venv. This keeps the host's macOS .venv from leaking into the Linux
+  // container and survives rebuilds.
+  "mounts": [
+    "source=phd-venv,target=/opt/venv,type=volume"
+  ],
+
+  "containerEnv": {
+    "UV_PROJECT_ENVIRONMENT": "/opt/venv",
+    "MLFLOW_TRACKING_URI": "file:///workspaces/phd/mlruns"
+  },
+
+  "forwardPorts": [5000],
+  "portsAttributes": {
+    "5000": { "label": "MLflow UI" }
+  },
+
+  "postCreateCommand": "bash .devcontainer/postCreate.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "ms-toolsai.jupyter"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/venv/bin/python",
+        "python.terminal.activateEnvironment": false,
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true
+        }
+      }
+    }
+  }
+}
