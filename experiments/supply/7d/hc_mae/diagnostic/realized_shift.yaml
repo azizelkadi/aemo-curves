@@ -1,0 +1,25 @@
+# Diagnostic (deployable). Persists a fraction (alpha=0.3) of the recently realised
+# lag-7 vs lag-14 price shift. Zero training; a naive counterpart to oracle_shift.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.diagnostic.realized_shift
+description: 'Deployable shift: persist a fraction of the recent realised lag-7 vs lag-14 shift.'
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: realized_shift
+  params:
+    base_lag: 7
+    lag_ref: 14
+    alpha: 0.3
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Zero-training counterpart to oracle_shift.

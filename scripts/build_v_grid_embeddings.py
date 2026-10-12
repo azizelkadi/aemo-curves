@@ -65,7 +65,7 @@ def _user_split(side: str, train_end: str, test_start: str, test_end: str):
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--side", default="demand", choices=("demand", "supply"))
+    parser.add_argument("--side", default="demand", choices=("demand", "supply", "residual"))
     parser.add_argument("--k", type=int, default=DEFAULT_V_GRID_DIM)
     parser.add_argument("--quantile", type=float, default=DEFAULT_V_MAX_QUANTILE)
     parser.add_argument("--split", default="canonical", choices=("canonical", "user"))

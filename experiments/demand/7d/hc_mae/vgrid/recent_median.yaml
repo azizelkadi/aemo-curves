@@ -1,0 +1,55 @@
+# Recent-pool retrieval with a median decoder (demand, no weather). The ridge query
+# of rolling_ridge_exog_proxyonly (market-state proxy only, shifted by the 7-day
+# horizon) ranks the curves of the same interval, any day of the week, dated in the
+# 28 days that end 7 days before the target date. The forecast is the pointwise
+# weighted median of the 5 nearest of these curves (weight 1 each) and of the curves
+# at lags 7 (weight 3), 8 to 14, 21 and 28 (weight 1 each), on the median volume
+# range of the 15 curves.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.vgrid.recent_median
+description: 'v_grid retrieval with the proxy-only ridge query from a pool of the last
+  28 known days, then the weighted median of the 5 nearest curves and 10 lagged curves.'
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+    bucket: interval
+    pool_max_age_days: 28
+    decode: median_topk
+    top_k: 5
+    topk_weight: 1
+    extra_lags:
+    - [7, 3]
+    - [8, 1]
+    - [9, 1]
+    - [10, 1]
+    - [11, 1]
+    - [12, 1]
+    - [13, 1]
+    - [14, 1]
+    - [21, 1]
+    - [28, 1]
+    range_rule: median
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'No weather input. The pool holds the curves of the same interval, any day,
+  dated D-34 to D-7. The forecast is the weighted median of the 5 nearest pool curves
+  (weight 1 each) and of the lags 7 (weight 3), 8 to 14, 21 and 28 (weight 1 each),
+  with range_rule median.'
+params:
+  exog:
+    sources:
+    - proxy

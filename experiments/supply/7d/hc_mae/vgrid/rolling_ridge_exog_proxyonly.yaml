@@ -1,0 +1,33 @@
+# No-weather FLOOR (supply). rolling_ridge plus ONLY the market-state proxy
+# (shifted by the 7-day horizon) - no weather at all. Isolates the value that
+# weather adds: the wfc (forecast) and wactual (ceiling) runs are measured
+# against this floor.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.vgrid.rolling_ridge_exog_proxyonly
+description: 'v_grid retrieval, rolling ridge refit, with the market-state proxy only
+  (no weather) as a no-weather floor.'
+data:
+  side: supply
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'No-weather floor: proxy features only. Isolates the marginal value of weather -
+  the weather_fc (forecast) and weather_actual (ceiling) runs are measured against this.'
+params:
+  exog:
+    sources:
+    - proxy

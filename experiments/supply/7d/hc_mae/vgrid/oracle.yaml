@@ -1,3 +1,9 @@
+# CEILING (not deployable). Picks the closest training curve to the TRUE curve within
+# the (interval, day-of-week) bucket - the best any bucket-restricted retriever could
+# do. Uses the answer; included only to bound how much headroom exists.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
 name: supply.7d.hc_mae.vgrid.oracle
 description: 'Oracle ceiling: closest train curve to the true curve in the (interval,
   day-of-week) bucket.'

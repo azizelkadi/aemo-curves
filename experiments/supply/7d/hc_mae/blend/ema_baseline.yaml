@@ -1,0 +1,30 @@
+# Lag blend (fixed weights). A fixed-weight average of the lag-7/14/21 embeddings,
+# applied on the lag-7 step structure. Learning-free smoother of the weekly lag.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.blend.ema_baseline
+description: Fixed-weight average of lag-7/14/21 applied on the lag-7 step structure.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: ema_baseline
+  params:
+    weights:
+    - 0.6
+    - 0.2
+    - 0.2
+    lags:
+    - 7
+    - 14
+    - 21
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Learning-free smoother of the weekly lag baseline.

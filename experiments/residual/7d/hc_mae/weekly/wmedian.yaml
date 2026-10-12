@@ -1,0 +1,40 @@
+# Learning-free weighted median of lagged residual (demand-minus-supply price
+# spread) curves. At each volume, the forecast price is the weighted median of the
+# same interval's residual curves at lags 7 (weight 2), 8 to 14, 21 and 28 (weight 1
+# each). The volume range runs from the median first edge to the median last edge
+# of the 10 curves (range_rule median). There is no training.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: residual.7d.hc_mae.weekly.wmedian
+description: 'Weighted median of the residual (demand-minus-supply price spread) curves at
+  lags 7 (weight 2), 8 to 14, 21 and 28, on the median volume range.'
+data:
+  side: residual
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: lag_wmedian
+  params:
+    lags:
+    - [7, 2]
+    - [8, 1]
+    - [9, 1]
+    - [10, 1]
+    - [11, 1]
+    - [12, 1]
+    - [13, 1]
+    - [14, 1]
+    - [21, 1]
+    - [28, 1]
+    range_rule: median
+    cap_map: null
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Weighted median of the residual (demand-minus-supply price spread) curves at
+  lags 7 (weight 2), 8 to 14, 21 and 28, on the median volume range.'

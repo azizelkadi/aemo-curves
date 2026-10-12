@@ -1,0 +1,27 @@
+# CEILING (not deployable). Each auction's curve is replaced by one of 48 medoid
+# curves: real train curves (2021-01 to 2024-04) chosen by k-medoids under HC-MAE
+# (scripts/build_hcmae_medoids.py). The method picks the medoid with the smallest
+# HC-MAE to the TRUE curve, so it uses the answer. It shows the best score that a
+# method returning one of these 48 curves can reach.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.medoids.hcmae_oracle
+description: 'Medoid ceiling: the HC-MAE medoid (K=48) with the smallest HC-MAE to the
+  true curve.'
+data:
+  side: demand
+  features: hcmae_medoids_k48
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: hcmae_medoid_oracle
+  params: {}
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Medoid ceiling: the HC-MAE medoid (K=48) with the smallest HC-MAE to the true
+  curve. Uses the answer.'

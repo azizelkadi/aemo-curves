@@ -1,0 +1,41 @@
+# The weighted median of supply.7d.hc_mae.weekly.wmedian, with price-cap mapping.
+# The cap of a date is the highest offer price over all supply curves of that
+# date, and the cap known for target D is the cap of D-7. In each lagged curve,
+# every step priced at or above (cap of its own date - 0.5) gets the known cap,
+# and when the known cap is lower, every price above it is cut to it. Then the
+# median is taken. There is no training.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.weekly.wmedian_cap
+description: 'Weighted median of the curves at lags 7 (weight 2), 8 to 14, 21 and 28,
+  on the lag-7 volume range, with the cap steps moved to the cap of D-7.'
+data:
+  side: supply
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: lag_wmedian
+  params:
+    lags:
+    - [7, 2]
+    - [8, 1]
+    - [9, 1]
+    - [10, 1]
+    - [11, 1]
+    - [12, 1]
+    - [13, 1]
+    - [14, 1]
+    - [21, 1]
+    - [28, 1]
+    range_rule: ref
+    cap_map: always
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Weighted median of the curves at lags 7 (weight 2), 8 to 14, 21 and 28,
+  on the lag-7 volume range, with the cap steps moved to the cap of D-7.'

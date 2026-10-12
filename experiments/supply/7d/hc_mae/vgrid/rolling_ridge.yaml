@@ -1,3 +1,9 @@
+# Rolling retrieval. Same v_grid stratified k=1 ridge-query retrieval as strat_knn,
+# but the ridge query model is re-fit at the start of every test month on data old
+# enough to respect the 7-day horizon. Adapts to drift.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
 name: supply.7d.hc_mae.vgrid.rolling_ridge
 description: v_grid retrieval, rolling monthly ridge refit.
 data:

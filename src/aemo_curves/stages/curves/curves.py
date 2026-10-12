@@ -9,7 +9,7 @@ import pandas as pd
 
 from aemo_curves.config import CURVES_DIR, MIN_POINTS_PER_AUCTION
 
-Side = Literal["supply", "demand"]
+Side = Literal["supply", "demand", "residual"]
 
 
 def _build_step_curve(

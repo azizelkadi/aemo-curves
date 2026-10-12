@@ -1,0 +1,31 @@
+# Learning-free weekly average. Averages the same interval's residual (demand-minus-
+# supply price spread) curves over the last four same-weekdays (lags 7/14/21/28) in the
+# interp embedding. Smooths single-day noise while preserving the weekly pattern.
+# Strong, zero-training reference.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: residual.7d.hc_mae.weekly.same_weekday_avg
+description: 'Best learning-free method: average of recent same-weekday residual
+  (demand-minus-supply price spread) curves (interp embedding).'
+data:
+  side: residual
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: same_weekday_avg
+  params:
+    lags:
+    - 7
+    - 14
+    - 21
+    - 28
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Best learning-free method: average of recent same-weekday residual
+  (demand-minus-supply price spread) curves (interp embedding).'

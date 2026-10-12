@@ -1,0 +1,50 @@
+# Volume shift (demand). The shape is the pointwise median of the 14 curves of
+# the same interval 7 to 20 days earlier. It starts at the smallest first edge of
+# these curves, ends at the median of their last edges, and keeps every edge of
+# the 14 curves in between (equal-price steps are not merged). A median model
+# (gradient-boosted trees with the absolute error loss, refit at the start of
+# every test month) forecasts the cliff volume, which is the volume of the bids
+# above the -1,000 $/MWh price floor. The shape then moves along the volume axis
+# to that volume, and its first and last step edges stay where they are. The
+# model reads curves dated 7 or more days before the target day, the calendar,
+# the market-state proxy of 7 days earlier and weather_fc. weather_fc is a
+# simulated forecast: the actual Perth weather of the target day plus seeded
+# random noise of the size of a day-7 forecast error. The noise is drawn
+# independently for each day, but real forecast errors are correlated from day
+# to day, so this score is optimistic.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.corrector.volume_shift_wfc
+description: 'Median shape of lags 7 to 20, moved along the volume axis to the cliff
+  volume forecast by a monthly median model with the proxy and a simulated day-7
+  weather forecast.'
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: volume_shift
+  params:
+    shape_lags: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    range_rule: median_minstart
+    merge_equal: false
+    learning_rate: 0.05
+    max_iter: 300
+    max_leaf_nodes: 31
+    min_samples_leaf: 200
+    l2_regularization: 1.0
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'weather_fc is a simulated forecast (actual weather plus seeded noise), so the
+  score is optimistic until real day-7 weather forecasts replace it.'
+params:
+  exog:
+    sources:
+    - proxy
+    - weather_fc

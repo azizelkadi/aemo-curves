@@ -1,0 +1,38 @@
+# AUTOREGRESSIVE (residual). The best deployable vgrid model `rolling_ridge_exog_split`
+# (split-PCA) plus the model's OWN predictions for the future gap days D-1, D-2, D-3
+# as extra features. Those days have not happened yet at the forecast origin (D-7),
+# so their curves must be predictions (a walk-forward backfill of the base model),
+# not real data. Two-stage stacking; leakage-safe (each pred(D-k) uses only data
+# <= D-k-7). pca_mode=split keeps the exog + self-pred block un-compressed. See
+# src/aemo_curves/stages/predict/autoregressive.py.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: residual.7d.hc_mae.vgrid.rolling_ridge_exog_split_ar
+description: 'Autoregressive: split-PCA champion + self-predictions for D-1..D-3 (8 block-means/lag).'
+data:
+  side: residual
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit_ar
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+    pca_mode: split
+    self_pred_lags: [1, 2, 3]
+    self_pred_blocks: 8
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Autoregressive: split-PCA champion + self-predictions for D-1..D-3 (8 block-means/lag).'
+params:
+  exog:
+    sources:
+    - proxy
+    - weather

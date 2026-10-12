@@ -1,0 +1,31 @@
+# Soft k-NN retrieval. A ridge query embedding selects the top-K nearest training
+# curves (softmax-weighted); the real top-1 curve is emitted. k=10, ridge query on
+# lags 7/14/21/28.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.retrieval.soft_knn
+description: Soft k-NN retrieval over the interp embedding with a ridge query.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: soft_knn
+  params:
+    k: 10
+    query: ridge
+    ridge_lags:
+    - 7
+    - 14
+    - 21
+    - 28
+    lag_days: 7
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Top-K softmax-weighted retrieval; emits the real top-1 curve.

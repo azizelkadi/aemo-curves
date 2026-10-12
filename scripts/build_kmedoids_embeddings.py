@@ -69,7 +69,7 @@ def embed_table(emb: KMedoidsCurveEmbedding, curves: pd.DataFrame, jobs: int) ->
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--side", choices=["supply", "demand"], default="supply")
+    p.add_argument("--side", choices=["supply", "demand", "residual"], default="supply")
     p.add_argument("--k", type=int, default=20)
     p.add_argument("--splits", nargs="*", choices=["train", "test"], default=["train", "test"])
     p.add_argument("--jobs", type=int, default=4)

@@ -16,8 +16,11 @@ oracle gap.
 
 Output curve representation
 ---------------------------
-Each predictor emits the **actual step (qty, price)** of the top-1
-retrieved row, preserving the real step structure.
+By default each predictor emits the **actual step (qty, price)** of the
+top-1 retrieved row, preserving the real step structure.
+`StratifiedKNNRetrievalPredictor(decode="median_topk")` emits instead the
+pointwise weighted median of the top-k retrieved curves and of optional
+lagged curves, which is a new step curve.
 """
 from __future__ import annotations
 
@@ -27,6 +30,36 @@ import pandas as pd
 from aemo_curves.core.predictor import CurvePredictor
 
 from ._features import hist_index, lag_row
+from .lag_median import RANGE_RULES, weighted_median_curve
+
+_BUCKETS = ("interval_dow", "interval_weekend", "interval")
+_DECODES = ("top1", "median_topk")
+
+
+def _day_numbers(dates) -> np.ndarray:
+    """Trading dates as whole days since 1970-01-01."""
+    return pd.to_datetime(pd.Series(dates)).to_numpy().astype("datetime64[D]").astype(np.int64)
+
+
+def _parse_extra_lags(extra_lags, horizon: int) -> tuple[tuple[int, int], ...]:
+    """[[lag_days, weight], ...] -> ((lag_days, weight), ...), checked."""
+    if extra_lags is None:
+        return ()
+    pairs = []
+    for item in extra_lags:
+        if len(item) != 2:
+            raise ValueError(f"each entry of extra_lags must be [lag_days, weight], got {item!r}")
+        lag, weight = item
+        if int(lag) != lag or int(weight) != weight:
+            raise ValueError(f"lag_days and weight in extra_lags must be integers, got {item!r}")
+        if lag < horizon:
+            raise ValueError(f"extra lag {lag} is below the forecast horizon of {horizon} days")
+        if weight < 1:
+            raise ValueError(f"weight of extra lag {lag} must be at least 1, got {weight}")
+        pairs.append((int(lag), int(weight)))
+    if len({lag for lag, _ in pairs}) != len(pairs):
+        raise ValueError(f"extra_lags must be distinct, got {[lag for lag, _ in pairs]}")
+    return tuple(pairs)
 
 
 def _index_by_interval(df: pd.DataFrame) -> dict[int, pd.DataFrame]:
@@ -88,6 +121,7 @@ def _build_stratified_query_model(self):
             lags=self.ridge_lags, alpha=self.ridge_alpha, n_pca=self.ridge_n_pca,
             use_calendar=True, use_trend=True,
             use_qty_total=self.ridge_use_qty_total, exog_provider=self.exog_provider,
+            pca_mode=getattr(self, "pca_mode", "joint"),
         )
     if q == "gbm":
         from .regression_retrieval import GBMRetrievalPredictor
@@ -233,10 +267,43 @@ class SoftKNNRetrievalPredictor(CurvePredictor):
 
 
 class StratifiedKNNRetrievalPredictor(CurvePredictor):
-    """k-NN retrieval with the candidate library restricted to (interval, dow).
+    """k-NN retrieval with the candidate library restricted to a bucket of rows.
 
     Combines optionally with soft averaging (top-K + softmax weights) and
     a configurable query embedding (lag-1 / Ridge / oracle).
+
+    The candidates of a target are ranked by the L2 distance between the query
+    and their embedding. With k=1 or decode="median_topk", ties go to the
+    earlier row of the pool. The pool and the output are set by these options
+    (the defaults return the top-1 curve of the fitted rows in the target's
+    interval and day of week):
+
+    - `bucket`: "interval_dow" (same interval and day of week),
+      "interval_weekend" (same interval and weekend flag) or "interval" (same
+      interval, any day).
+    - `pool_max_age_days`: None makes the pool the fitted rows in the target's
+      bucket. An integer N makes it the rows of the historical table (the
+      second argument of `predict`) in the target's bucket dated from
+      D - lag_days - N + 1 to D - lag_days, where D is the target date. This
+      pool holds the N latest days known at forecast time, so it moves with
+      the target date.
+    - `decode`: "top1" returns the curve of the nearest candidate.
+      "median_topk" returns the pointwise weighted median
+      (`lag_median.weighted_median_curve`) of the `top_k` nearest candidates
+      (weight `topk_weight` each) and of the curves of the target's interval
+      at the dates D - lag for each [lag, weight] pair of `extra_lags`. This
+      output is a new step curve, so its row carries `retrieved_dates` (the
+      dates of the `top_k` candidates, nearest first) in place of
+      `retrieved_date` and `pred_embedding`.
+    - `range_rule` ("median_topk" only): the volume range of the median curve,
+      "median" or "ref". The reference curve of "ref" is the curve of the
+      first pair of `extra_lags`, or the nearest candidate when `extra_lags`
+      is empty.
+
+    With `extra_lags`, a target whose first lag has no curve gets no
+    forecast, and a missing curve at any other lag is dropped with its weight.
+    Every lag must be at least `lag_days`, and every weight a whole number of
+    at least 1.
     """
 
     name = "stratified_knn_retrieval"
@@ -246,7 +313,7 @@ class StratifiedKNNRetrievalPredictor(CurvePredictor):
         k: int = 5,
         query: str = "ridge",
         tau: float = 5.0,
-        bucket: str = "interval_dow",   # 'interval_dow' or 'interval_weekend'
+        bucket: str = "interval_dow",
         ridge_alpha: float = 2.0,
         ridge_n_pca: int | None = 20,
         ridge_lags: tuple[int, ...] = (1, 2, 7, 14),
@@ -256,13 +323,34 @@ class StratifiedKNNRetrievalPredictor(CurvePredictor):
         pool_offsets: tuple[tuple[int, int], ...] = ((0, 0),),
         gbm_kwargs: dict | None = None,
         exog_provider=None,
+        pca_mode: str = "joint",
+        pool_max_age_days: int | None = None,
+        decode: str = "top1",
+        top_k: int = 5,
+        topk_weight: int = 1,
+        extra_lags=None,
+        range_rule: str = "median",
     ) -> None:
         if query not in {"oracle", "lag", "lag1", "ridge", "gbm", "neural", "xgboost", "rf"}:
             raise ValueError(query)
-        if bucket not in {"interval_dow", "interval_weekend"}:
-            raise ValueError(bucket)
+        if bucket not in _BUCKETS:
+            raise ValueError(f"bucket must be one of {_BUCKETS}, got {bucket!r}")
         if output_mode not in {"top1_curve"}:
             raise ValueError(output_mode)
+        if pca_mode not in {"joint", "split"}:
+            raise ValueError(f"pca_mode must be 'joint' or 'split', got {pca_mode!r}")
+        if pool_max_age_days is not None and (int(pool_max_age_days) != pool_max_age_days or pool_max_age_days < 1):
+            raise ValueError(f"pool_max_age_days must be None or a whole number of at least 1, got {pool_max_age_days!r}")
+        if decode not in _DECODES:
+            raise ValueError(f"decode must be one of {_DECODES}, got {decode!r}")
+        if int(top_k) != top_k or top_k < 1:
+            raise ValueError(f"top_k must be a whole number of at least 1, got {top_k!r}")
+        if int(topk_weight) != topk_weight or topk_weight < 1:
+            raise ValueError(f"topk_weight must be a whole number of at least 1, got {topk_weight!r}")
+        if range_rule not in RANGE_RULES:
+            raise ValueError(f"range_rule must be one of {RANGE_RULES}, got {range_rule!r}")
+        if decode == "top1" and (extra_lags or range_rule != "median"):
+            raise ValueError("extra_lags and range_rule are options of decode='median_topk'")
         self.k = int(k)
         self.query = query
         self.tau = float(tau)
@@ -276,11 +364,18 @@ class StratifiedKNNRetrievalPredictor(CurvePredictor):
         self.pool_offsets = tuple((int(di), int(dd)) for di, dd in pool_offsets)
         self.gbm_kwargs = dict(gbm_kwargs or {})
         self.exog_provider = exog_provider
+        self.pca_mode = pca_mode
+        self.pool_max_age_days = None if pool_max_age_days is None else int(pool_max_age_days)
+        self.decode = decode
+        self.top_k = int(top_k)
+        self.topk_weight = int(topk_weight)
+        self.extra_lags = _parse_extra_lags(extra_lags, self.lag_days)
+        self.range_rule = range_rule
         self._library: dict = {}
         self._ridge_adapter = None  # adapter object (Ridge or GBM)
 
     def params(self) -> dict:
-        return {
+        p = {
             "model": self.name, "k": self.k, "query": self.query,
             "tau": self.tau, "bucket": self.bucket,
             "output_mode": self.output_mode,
@@ -289,11 +384,22 @@ class StratifiedKNNRetrievalPredictor(CurvePredictor):
             "ridge_use_qty_total": self.ridge_use_qty_total,
             "pool_offsets": ";".join(f"{di},{dd}" for di, dd in self.pool_offsets),
         }
+        if self.pool_max_age_days is not None:
+            p["pool_max_age_days"] = self.pool_max_age_days
+        if self.decode != "top1":
+            p.update({
+                "decode": self.decode, "top_k": self.top_k, "topk_weight": self.topk_weight,
+                "extra_lags": ";".join(f"{lag},{w}" for lag, w in self.extra_lags),
+                "range_rule": self.range_rule,
+            })
+        return p
 
     def _key(self, interval: int, trading_date) -> tuple:
         ts = pd.Timestamp(trading_date)
         if self.bucket == "interval_dow":
             return (int(interval), int(ts.dayofweek))
+        if self.bucket == "interval":
+            return (int(interval), 0)
         return (int(interval), int(ts.dayofweek >= 5))
 
     def _candidate_keys(self, interval: int, trading_date) -> list[tuple]:
@@ -305,6 +411,8 @@ class StratifiedKNNRetrievalPredictor(CurvePredictor):
                 continue
             if self.bucket == "interval_dow":
                 out.append((i2, (int(ts.dayofweek) + int(dd)) % 7))
+            elif self.bucket == "interval":
+                out.append((i2, 0))
             else:
                 # interval_weekend: dd flips the weekend flag when |dd|>=1
                 wknd = int(ts.dayofweek >= 5)
@@ -319,15 +427,92 @@ class StratifiedKNNRetrievalPredictor(CurvePredictor):
         return deduped
 
     def fit(self, train_embeddings: pd.DataFrame) -> StratifiedKNNRetrievalPredictor:
-        buckets: dict[tuple, list[int]] = {}
-        for pos, (_, row) in enumerate(train_embeddings.iterrows()):
-            buckets.setdefault(self._key(row["Interval Number"], row["Trading Date"]), []).append(pos)
-        self._library = {k: train_embeddings.iloc[idx].reset_index(drop=True) for k, idx in buckets.items()}
+        self._library = {}
+        if self.pool_max_age_days is None:
+            buckets: dict[tuple, list[int]] = {}
+            for pos, (_, row) in enumerate(train_embeddings.iterrows()):
+                buckets.setdefault(self._key(row["Interval Number"], row["Trading Date"]), []).append(pos)
+            self._library = {k: train_embeddings.iloc[idx].reset_index(drop=True) for k, idx in buckets.items()}
         if self.query in _STRATIFIED_QUERY_MODELS:
             inner = _build_stratified_query_model(self)
             inner.fit(train_embeddings)
             self._ridge_adapter = inner
         return self
+
+    def _recent_library(self, hist: pd.DataFrame) -> dict[tuple, tuple[np.ndarray, pd.DataFrame]]:
+        """Rows of `hist` by bucket key, in date order: key -> (day numbers, rows)."""
+        day = _day_numbers(hist["Trading Date"])
+        interval = hist["Interval Number"].to_numpy(dtype=np.int64)
+        dow = pd.to_datetime(pd.Series(hist["Trading Date"])).dt.dayofweek.to_numpy()
+        if self.bucket == "interval_dow":
+            second = dow
+        elif self.bucket == "interval":
+            second = np.zeros(len(hist), dtype=np.int64)
+        else:
+            second = (dow >= 5).astype(np.int64)
+        groups = pd.DataFrame({"interval": interval, "second": second}).groupby(["interval", "second"]).indices
+        out = {}
+        for (iv, sec), pos in groups.items():
+            pos = pos[np.argsort(day[pos], kind="stable")]
+            out[(int(iv), int(sec))] = (day[pos], hist.iloc[pos].reset_index(drop=True))
+        return out
+
+    def _pool(self, interval: int, trading_date, day: int | None, recent) -> pd.DataFrame | None:
+        """Candidate rows of one target, or None when the pool is empty."""
+        keys = self._candidate_keys(interval, trading_date)
+        if recent is None:
+            parts = [self._library[k] for k in keys if k in self._library and len(self._library[k]) > 0]
+        else:
+            hi = day - self.lag_days
+            lo = hi - self.pool_max_age_days + 1
+            parts = []
+            for k in keys:
+                if k not in recent:
+                    continue
+                days, frame = recent[k]
+                a = int(np.searchsorted(days, lo, side="left"))
+                b = int(np.searchsorted(days, hi, side="right"))
+                if b > a:
+                    parts.append(frame.iloc[a:b])
+        if not parts:
+            return None
+        return pd.concat(parts, ignore_index=True) if len(parts) > 1 else parts[0]
+
+    def _median_row(self, r, interval: int, library: pd.DataFrame, d: np.ndarray, hist_idx, hist_curves) -> dict | None:
+        """Output row of decode="median_topk", or None when the first extra lag has no curve."""
+        hist_qty, hist_price = hist_curves
+        ts = pd.Timestamp(r["Trading Date"])
+        curves, weights = [], []
+        for n, (lag, weight) in enumerate(self.extra_lags):
+            pos = hist_idx.get((interval, (ts - pd.Timedelta(days=lag)).date()))
+            if pos is None:
+                if n == 0:
+                    return None
+                continue
+            curves.append((hist_qty[pos], hist_price[pos]))
+            weights.append(weight)
+        n_lags = len(curves)
+        kk = min(self.top_k, len(d))
+        top = np.argsort(d, kind="stable")[:kk]
+        for t in top:
+            curves.append((library["curve_qty"].iat[int(t)], library["curve_price"].iat[int(t)]))
+            weights.append(self.topk_weight)
+        pred_qty, pred_price = weighted_median_curve(curves, weights, range_rule=self.range_rule, ref=0)
+        return {
+            "Trading Date": r["Trading Date"],
+            "Interval Number": interval,
+            "true_embedding": r["embedding"],
+            "true_curve_qty": r["curve_qty"],
+            "true_curve_price": r["curve_price"],
+            "pred_curve_qty": pred_qty,
+            "pred_curve_price": pred_price,
+            "retrieved_dates": [library["Trading Date"].iat[int(t)] for t in top],
+            "n_neighbors_used": kk,
+            "n_lags_used": n_lags,
+            "bucket_size": int(len(library)),
+            "retrieval_dist": float(d[top[0]]),
+            "retrieval_dist_2": float(np.partition(d, 1)[1]) if len(d) >= 2 else float("nan"),
+        }
 
     def predict(
         self,
@@ -336,14 +521,19 @@ class StratifiedKNNRetrievalPredictor(CurvePredictor):
     ) -> pd.DataFrame:
         hist = historical_embeddings.reset_index(drop=True)
         hist_idx = hist_index(hist)
+        recent = self._recent_library(hist) if self.pool_max_age_days is not None else None
+        hist_curves = None
+        if self.decode == "median_topk":
+            hist_curves = (hist["curve_qty"].to_numpy(), hist["curve_price"].to_numpy())
+        test = test_embeddings.sort_values(["Trading Date", "Interval Number"])
+        test_days = _day_numbers(test["Trading Date"]) if recent is not None else None
         rows = []
-        for _, r in test_embeddings.sort_values(["Trading Date", "Interval Number"]).iterrows():
+        for j, (_, r) in enumerate(test.iterrows()):
             interval = int(r["Interval Number"])
-            keys = self._candidate_keys(interval, r["Trading Date"])
-            parts = [self._library[k] for k in keys if k in self._library and len(self._library[k]) > 0]
-            if not parts:
+            day = None if test_days is None else int(test_days[j])
+            library = self._pool(interval, r["Trading Date"], day, recent)
+            if library is None:
                 continue
-            library = pd.concat(parts, ignore_index=True) if len(parts) > 1 else parts[0]
             q = _query_embedding(
                 self.query, r, hist, hist_idx, self._ridge_adapter,
                 lag_days=self.lag_days,
@@ -352,6 +542,11 @@ class StratifiedKNNRetrievalPredictor(CurvePredictor):
                 continue
             cand = np.vstack(library["embedding"].to_numpy())
             d = np.linalg.norm(cand - q.reshape(1, -1), axis=1)
+            if self.decode == "median_topk":
+                row = self._median_row(r, interval, library, d, hist_idx, hist_curves)
+                if row is not None:
+                    rows.append(row)
+                continue
             k = min(self.k, len(d))
             top = np.argpartition(d, k - 1)[:k] if k > 1 else np.array([int(np.argmin(d))])
             top_d = d[top]

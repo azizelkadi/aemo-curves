@@ -1,0 +1,31 @@
+# Adaptive family: per-row soft blend of the lag-7 baseline curve and the champion's
+# retrieved curve (residual.7d.hc_mae.vgrid.rolling_ridge_exog_split, ~181.40; the best
+# deployable residual model, -10.50 vs the 191.90 lag-7 baseline). This CONTROL uses one
+# blend weight per test month, grid-picked (0..1 step 0.05) to minimise the blended
+# HC-MAE on the trailing rows. No per-row information is used.
+#
+# Residual curves are non-increasing (like demand); the union-breakpoint convex blend
+# preserves that direction.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: residual.7d.hc_mae.adaptive.constant_blend
+description: 'Adaptive blend, constant control: one grid-picked blend weight per test
+  month from trailing blended error.'
+data:
+  side: residual
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: adaptive
+  params:
+    precompute: adaptive_precompute_residual_7d.pkl
+    weight_mode: constant_blend
+    trailing_windows: [7, 28]
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7

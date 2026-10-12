@@ -1,0 +1,26 @@
+# Baseline (reference). Predicts each auction's residual (demand-minus-supply price
+# spread) curve as the curve at the SAME interval exactly 7 days earlier (lag-7).
+# Every model in this group is scored against this; a model must beat it to be useful.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: residual.7d.hc_mae.baseline.lag7
+description: 'Lag-7 baseline: the residual (demand-minus-supply price spread) curve at
+  the same interval seven days earlier.'
+data:
+  side: residual
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: lag1
+  params:
+    lag_days: 7
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Lag-7 baseline: the residual (demand-minus-supply price spread) curve at the
+  same interval seven days earlier.'

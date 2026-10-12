@@ -1,0 +1,30 @@
+# Per-tau-slice probabilistic regressor (literature proposal #11). One HistGBM per
+# slice of the cumulative-quantity axis predicts the price at that slice from lag-7
+# features; predictions are isotonised into a monotone curve. DEMAND ONLY - the code
+# hardcodes a monotone DEcrease across slices. (Uses HistGBM; native NGBoost/CRPS
+# would need the optional ngboost package.)
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.probabilistic.ngboost_per_slice
+description: Per-tau-slice probabilistic regressor (HistGBM), isotonised to a monotone curve.
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: ngboost_per_slice
+  params:
+    lags:
+    - 7
+    - 8
+    - 14
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Proposal #11. Demand only: the strategy hardcodes a monotone-DEcrease across slices. Uses the
+  HistGBM backend (ngboost package not installed -> native CRPS would need it).'

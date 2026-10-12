@@ -95,15 +95,26 @@ def run_experiment(
     PREDICTIONS.validate(predictions)
 
     metric = get("evaluate", experiment.metric)
-    from aemo_curves.stages.evaluate import attach_baseline, score_predictions, summary_stats
+    from aemo_curves.stages.evaluate import (
+        attach_baseline,
+        attach_clearing,
+        clearing_summary,
+        score_predictions,
+        summary_stats,
+    )
 
     scored = score_predictions(predictions, metric)
+    baseline_preds = None
     if experiment.baseline is not None:
         baseline_strategy = get("predict", experiment.baseline["strategy"])
         baseline_preds = baseline_strategy(ctx, **experiment.baseline.get("params", {}))
         baseline_scored = score_predictions(baseline_preds, metric)
         scored = attach_baseline(scored, baseline_scored, metric)
+    # Market-clearing errors run on every experiment (with or without a baseline),
+    # reported alongside the ranking metric and never used to sort.
+    scored = attach_clearing(scored, baseline_preds, side=side, split=split)
     metrics = summary_stats(scored, metric)
+    metrics.update(clearing_summary(scored))
     SCORES.validate(scored)
     if metric.curve_col not in scored.columns:
         raise ContractError(f"scores: missing metric column {metric.curve_col!r}")

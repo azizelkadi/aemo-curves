@@ -1,0 +1,32 @@
+# Adaptive family: per-row soft blend of the lag-7 baseline curve and the champion's
+# retrieved curve (residual.7d.hc_mae.vgrid.rolling_ridge_exog_split). This CONTROL sets
+# one weight per (interval-block-of-4 x weekend/weekday) stratum from trailing realized
+# errors, shrunk toward the global constant weight; strata with fewer than 50 trailing
+# rows fall back to the global.
+#
+# Residual curves are non-increasing (like demand); the union-breakpoint convex blend
+# preserves that direction.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: residual.7d.hc_mae.adaptive.stratum_blend
+description: 'Adaptive blend, stratum control: weight per (interval-block x weekend)
+  from trailing errors, shrunk toward the global constant weight.'
+data:
+  side: residual
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: adaptive
+  params:
+    precompute: adaptive_precompute_residual_7d.pkl
+    weight_mode: stratum_blend
+    trailing_windows: [7, 28]
+    shrink_min_rows: 50
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7

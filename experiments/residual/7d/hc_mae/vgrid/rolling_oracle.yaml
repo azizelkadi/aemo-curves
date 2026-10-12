@@ -1,0 +1,27 @@
+# CEILING (not deployable). Picks the closest training residual (demand-minus-supply
+# price spread) curve to the TRUE curve within the (interval, day-of-week) bucket - the
+# best any bucket-restricted retriever could do. Uses the answer; included only to bound
+# how much headroom exists.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: residual.7d.hc_mae.vgrid.rolling_oracle
+description: 'Diagnostic ceiling: rolling-library retrieval oracle — fair version of
+  vgrid.oracle (uses the truth; not deployable)'
+data:
+  side: residual
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit
+  params:
+    query: oracle
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Diagnostic ceiling: rolling-library retrieval oracle — fair version of vgrid.oracle
+  (uses the truth; not deployable)'

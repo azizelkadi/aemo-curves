@@ -1,0 +1,28 @@
+# Lag blend (learned simplex). Learns per-(interval, day-of-week) non-negative weights
+# summing to 1 over the lag-7/14/21/28 embeddings.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.blend.learned_blend
+description: Per-(interval,dow) simplex weights over lag-7/14/21/28 embeddings.
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: learned_blend
+  params:
+    lags:
+    - 7
+    - 14
+    - 21
+    - 28
+    stratify_by: interval_dow
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Convex combination of four weekly lags, weights learned per bucket.

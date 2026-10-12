@@ -1,0 +1,30 @@
+# Baseline corrector (per-day shift). Predicts ONE price shift per trading day, shared
+# across all 48 intervals, applied to the lag-7 curve. Pooling across intervals gives
+# far more samples per model and lower variance than a per-interval shift.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.corrector.per_day_shift
+description: One shift per trading day (pooled across all 48 intervals) applied to the lag-7 curve.
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: per_day_shift
+  params:
+    base_lag: 7
+    lags:
+    - 7
+    - 14
+    - 21
+    - 28
+    alpha: 20.0
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Pools ~1200 day-level samples instead of ~25 per interval -> much lower variance.

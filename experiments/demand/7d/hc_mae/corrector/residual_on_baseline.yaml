@@ -1,0 +1,32 @@
+# Baseline corrector (64-d residual). A per-interval, PCA-compressed ridge predicts a
+# price residual at each quantile and adds it on the lag-7 curve's real step positions.
+# Heavy regularisation biases the residual toward zero, so it stays near the baseline.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.corrector.residual_on_baseline
+description: Per-interval ridge predicts a 64-d price residual on the lag-7 step positions.
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: residual_on_baseline
+  params:
+    lags:
+    - 7
+    - 14
+    - 21
+    - 28
+    alpha: 20.0
+    n_pca_x: 20
+    n_pca_y: 10
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Keeps the lag-7 step structure; shifts each step by a predicted residual. Strong regularisation
+  biases the residual to zero (can't do worse than baseline in expectation).

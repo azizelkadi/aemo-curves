@@ -23,6 +23,7 @@ for this reason.
 """
 
 from .builder import build_exog_provider
+from .forecast_weather import ForecastPerturbedDailySource
 from .holidays import is_wa_holiday, wa_holiday_flags
 from .loaders import ExternalCsvSource, load_external_daily_csv, load_external_interval_csv
 from .provider import ExogenousProvider, ExogenousSource
@@ -36,6 +37,7 @@ __all__ = [
     "ExogenousProvider",
     "ExogenousSource",
     "ExternalCsvSource",
+    "ForecastPerturbedDailySource",
     "MarketStateProxySource",
     "build_day_state_table",
     "build_exog_provider",

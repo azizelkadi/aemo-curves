@@ -1,0 +1,38 @@
+# AUTOREGRESSIVE ABLATION (demand, split-PCA). Same self-prediction features as
+# rolling_ridge_exog_wfc_ar, but built on the split-PCA demand base
+# (rolling_ridge_exog_split) so the 27 AR feature dims enter the ridge RAW
+# (standard-scaled, un-compressed) instead of being PCA-diluted with the 64-d
+# embedding as in the joint-PCA wfc base. Tests whether AR's demand result is a
+# PCA-dilution artifact vs a genuine no-help. Two-stage stacking; leakage-safe.
+# See src/aemo_curves/stages/predict/autoregressive.py.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.vgrid.rolling_ridge_exog_split_ar
+description: 'Autoregressive ablation: split-PCA demand base + self-predictions for D-1..D-3 (AR dims un-diluted).'
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit_ar
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+    pca_mode: split
+    self_pred_lags: [1, 2, 3]
+    self_pred_blocks: 8
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Autoregressive ablation: split-PCA demand base + self-predictions for D-1..D-3 (AR dims un-diluted).'
+params:
+  exog:
+    sources:
+    - proxy
+    - weather

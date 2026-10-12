@@ -1,3 +1,9 @@
+# Static retrieval. A per-(interval, day-of-week) ridge predicts a query embedding
+# from the lag-7 features (in the v_grid space); the nearest REAL training curve in
+# that bucket is returned. Fit once on train. Strong on demand, weak on supply.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
 name: demand.7d.hc_mae.vgrid.strat_knn
 description: v_grid retrieval, static k=1 ridge query (fit once on train).
 data:

@@ -1,0 +1,37 @@
+# AUTOREGRESSIVE (demand). The best DEPLOYABLE demand model `rolling_ridge_exog_wfc`
+# (proxy + simulated day-7 weather forecast, HC-MAE ~117.4, best deployable on the live
+# leaderboard) plus the model's OWN predictions for the future gap days D-1, D-2, D-3 as
+# extra features. Those days have not happened yet at the forecast origin (D-7), so their
+# curves must be predictions (a walk-forward backfill of the base model), not real data.
+# Two-stage stacking; leakage-safe (each pred(D-k) uses only data <= D-k-7). See
+# src/aemo_curves/stages/predict/autoregressive.py.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.vgrid.rolling_ridge_exog_wfc_ar
+description: 'Autoregressive: wfc base (proxy + day-7 weather forecast) + self-predictions for D-1..D-3 (8 block-means/lag).'
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit_ar
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+    self_pred_lags: [1, 2, 3]
+    self_pred_blocks: 8
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Autoregressive: wfc base (proxy + day-7 weather forecast) + self-predictions for D-1..D-3 (8 block-means/lag).'
+params:
+  exog:
+    sources:
+    - proxy
+    - weather_fc

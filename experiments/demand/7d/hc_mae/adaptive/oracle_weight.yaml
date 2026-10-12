@@ -1,0 +1,26 @@
+# Adaptive family DIAGNOSTIC (NOT DEPLOYABLE): uses the TRUTH. For each row it picks
+# the blend weight over the 0..1 grid (step 0.05) that minimises that row's realized
+# HC-MAE. This is the ceiling for the soft-blend family and is not a real forecast;
+# by construction it scores at or below oracle_gate.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.adaptive.oracle_weight
+description: 'DIAGNOSTIC, not deployable (uses the truth): per-row best blend weight
+  over the grid. Soft-blend ceiling (<= oracle_gate).'
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: adaptive
+  params:
+    precompute: adaptive_precompute_demand_7d.pkl
+    weight_mode: oracle_weight
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7

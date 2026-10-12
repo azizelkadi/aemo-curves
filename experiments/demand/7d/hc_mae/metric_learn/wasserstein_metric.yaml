@@ -1,0 +1,32 @@
+# Supervised Wasserstein-distillation metric learning (literature proposal #18).
+# Trains a small MLP encoder so Euclidean distance in the learned space approximates
+# the curves' Wasserstein-1 distance, then runs stratified-kNN retrieval inside that
+# learned embedding. n_pairs/epochs trimmed for runtime; lag_days=7, ridge_lags=[7].
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.metric_learn.wasserstein_metric
+description: Supervised Wasserstein-distillation metric learning, then kNN retrieval in the learned space.
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: wasserstein_metric
+  params:
+    lag_days: 7
+    ridge_lags:
+    - 7
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+    n_pairs_per_target: 16
+    epochs: 20
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Proposal #18 (4/5-endorsed board top pick). Trains an MLP so L2 ~ W1, then runs the stratified-kNN
+  retrieval inside the learned embedding. Pairs/epochs trimmed for runtime.'

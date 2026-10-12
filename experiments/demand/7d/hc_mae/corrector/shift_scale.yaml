@@ -1,0 +1,29 @@
+# Baseline corrector (shift + scale). Like shift, but also predicts a log quantity
+# scale, so the lag-7 curve is both translated in price and stretched/squeezed in
+# quantity. Best corrector on demand (-7 vs lag-7).
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.corrector.shift_scale
+description: Per-interval ridge predicts (price shift, log quantity scale) for the lag-7 curve.
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: shift_scale_corrector
+  params:
+    lags:
+    - 7
+    - 14
+    - 21
+    - 28
+    alpha: 5.0
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Adds a quantity-axis scale to the shift corrector.

@@ -1,0 +1,25 @@
+# Lag blend (learned 2-lag). Learns, per (interval, day-of-week), the convex weight
+# that best blends the lag-7 and lag-14 curves (closed-form least squares).
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.blend.blended_lag
+description: Learned per-(interval,dow) convex blend of lag-7 and lag-14 embeddings.
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: blended_lag
+  params:
+    mode: per_interval_dow
+    lag_base: 7
+    lag_alt: 14
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Closed-form optimal blend weight per bucket.

@@ -11,6 +11,7 @@ dependencies = [
     "scikit-learn>=1.4",
     "matplotlib>=3.8",
     "seaborn>=0.13",
+    "plotly>=5.20",
     "mlflow>=2.12",
     "pyarrow>=15",
     "tqdm>=4.66",

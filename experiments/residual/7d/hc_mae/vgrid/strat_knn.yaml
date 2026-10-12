@@ -1,0 +1,28 @@
+# Static retrieval. A per-(interval, day-of-week) ridge predicts a query embedding
+# from the lag-7 features (in the v_grid space); the nearest REAL training residual
+# (demand-minus-supply price spread) curve in that bucket is returned. Fit once on train.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: residual.7d.hc_mae.vgrid.strat_knn
+description: v_grid retrieval, static k=1 ridge query (fit once on train), on the residual
+  (demand-minus-supply price spread) curve.
+data:
+  side: residual
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: static_retrieval
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: v_grid retrieval, static k=1 ridge query (fit once on train), on the residual
+  (demand-minus-supply price spread) curve.

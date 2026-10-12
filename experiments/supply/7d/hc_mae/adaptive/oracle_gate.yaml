@@ -1,0 +1,26 @@
+# Adaptive family DIAGNOSTIC (NOT DEPLOYABLE): uses the TRUTH. For each row it picks
+# whichever of the two candidate curves (lag-7 baseline or champion) is actually
+# closer to the realized curve (weight in {0, 1}). This is the ceiling for a perfect
+# two-way per-row gate between the two endpoints and is not a real forecast.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.adaptive.oracle_gate
+description: 'DIAGNOSTIC, not deployable (uses the truth): per-row hard pick of the
+  better of the two endpoint curves. Perfect two-way gate ceiling.'
+data:
+  side: supply
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: adaptive
+  params:
+    precompute: adaptive_precompute_supply_7d.pkl
+    weight_mode: oracle_gate
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7

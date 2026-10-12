@@ -1,0 +1,27 @@
+# Adaptive family: per-row soft blend of the lag-7 baseline curve and the champion's
+# retrieved curve. Identical to prob_blend but WITHOUT the isotonic calibration: the
+# raw classifier probability is used as the per-row blend weight. This isolates the
+# contribution of calibration by comparison with prob_blend.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.adaptive.prob_blend_raw
+description: 'Adaptive blend, learned uncalibrated: gradient-boosted P(baseline better)
+  used raw as the per-row blend weight (calibration ablation).'
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: adaptive
+  params:
+    precompute: adaptive_precompute_demand_7d.pkl
+    weight_mode: prob_blend_raw
+    trailing_windows: [7, 28]
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7

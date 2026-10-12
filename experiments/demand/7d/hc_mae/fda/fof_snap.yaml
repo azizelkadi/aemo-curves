@@ -1,0 +1,32 @@
+# FDA / function-on-function (literature proposal #5, Li-Alonso-Pascual).
+# PCA on the 64-d interp embedding -> a per-interval ridge predicts today's PCA
+# scores from the lag scores -> snaps the prediction to the nearest real training
+# curve in score space (so the output is always a genuine staircase).
+# lags=[7,8,14] keep every input >= the 7-day horizon.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.fda.fof_snap
+description: 'FDA: function-on-function PCA regression + closest-train-curve snap.'
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: fof_snap
+  params:
+    n_components: 10
+    alpha: 100.0
+    lags:
+    - 7
+    - 8
+    - 14
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Proposal #5 (Li-Alonso-Pascual). PCA on the interp embedding, per-interval ridge on lag PCA-scores,
+  snap to nearest real training curve. Lags shrunk to the 7-day horizon.'

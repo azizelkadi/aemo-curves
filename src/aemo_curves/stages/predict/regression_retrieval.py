@@ -35,8 +35,13 @@ class EmbeddingRegressionRetrievalPredictor(CurvePredictor):
         exog_provider=None,
         pipeline_x: bool = False,
         pca_random_state: int | None = None,
+        pca_mode: str = "joint",
         name: str | None = None,
     ) -> None:
+        if pca_mode not in {"joint", "split"}:
+            raise ValueError(
+                f"pca_mode must be 'joint' or 'split', got {pca_mode!r}"
+            )
         self.estimator_factory = estimator_factory
         self.lags = tuple(sorted(lags))
         self.n_pca_x = n_pca_x
@@ -48,6 +53,7 @@ class EmbeddingRegressionRetrievalPredictor(CurvePredictor):
         self.exog_provider = exog_provider
         self.pipeline_x = bool(pipeline_x)
         self.pca_random_state = pca_random_state
+        self.pca_mode = pca_mode
         if name is not None:
             self.name = name
         self._models: dict[int, dict] = {}
@@ -74,6 +80,50 @@ class EmbeddingRegressionRetrievalPredictor(CurvePredictor):
                     steps.append(("pca", PCA(n_components=components)))
         return Pipeline(steps)
 
+    def _embedding_block_dim(self, emb_width: int) -> int:
+        """Width of the leading embedding block of the feature vector.
+
+        Mirrors the block order laid down by ``feature_from_lags``: one lag
+        embedding per lag, plus a trend block (first-lag minus second-lag
+        embedding) when trend is on and there are at least two lags. The
+        remaining features (calendar, optional qty_total, exogenous) form the
+        raw block that ``pca_mode="split"`` scales but does not compress.
+        """
+        dim = emb_width * len(self.lags)
+        if self.use_trend and len(self.lags) >= 2:
+            dim += emb_width
+        return dim
+
+    def _fit_split_pipeline(self, X: np.ndarray, emb_width: int) -> dict:
+        """Fit the split X-pipeline: PCA the embedding block, scale the rest.
+
+        StandardScaler + PCA(n_pca_x) is fitted on the leading embedding block
+        only; a separate StandardScaler is fitted on the remaining (calendar +
+        exog) block; transformed blocks are concatenated. When there is no raw
+        block this reduces to scaler+PCA on the whole X.
+        """
+        emb_dim = self._embedding_block_dim(emb_width)
+        Xemb, Xraw = X[:, :emb_dim], X[:, emb_dim:]
+        emb_scaler = StandardScaler().fit(Xemb)
+        Xemb_s = emb_scaler.transform(Xemb)
+        pca = None
+        if self.n_pca_x is not None:
+            comp = min(self.n_pca_x, Xemb_s.shape[0] - 1, Xemb_s.shape[1])
+            if comp > 0:
+                pca = PCA(n_components=comp).fit(Xemb_s)
+        raw_scaler = StandardScaler().fit(Xraw) if Xraw.shape[1] else None
+        return {"emb_dim": emb_dim, "emb_scaler": emb_scaler, "pca": pca, "raw_scaler": raw_scaler}
+
+    def _transform_split(self, split: dict, X: np.ndarray) -> np.ndarray:
+        emb_dim = split["emb_dim"]
+        Xemb, Xraw = X[:, :emb_dim], X[:, emb_dim:]
+        Xemb_s = split["emb_scaler"].transform(Xemb)
+        Xemb_t = split["pca"].transform(Xemb_s) if split["pca"] is not None else Xemb_s
+        if split["raw_scaler"] is not None:
+            Xraw_s = split["raw_scaler"].transform(Xraw)
+            return np.hstack([Xemb_t, Xraw_s])
+        return Xemb_t
+
     def _feat(self, interval, trading_date, hist, hist_idx):
         return feature_from_lags(
             interval, trading_date, hist, hist_idx,
@@ -99,15 +149,24 @@ class EmbeddingRegressionRetrievalPredictor(CurvePredictor):
             X = np.vstack(X_rows)
             Y = np.vstack(Y_rows)
             if self.pipeline_x:
-                x_pipe = self._new_x_pipeline(X)
-                Xp = x_pipe.fit_transform(X)
                 y_scaler = StandardScaler()
                 Ys = y_scaler.fit_transform(Y)
-                est = self.estimator_factory(Ys.shape[1])
-                est.fit(Xp, Ys)
-                self._models[interval] = {
-                    "x_pipeline": x_pipe, "y_scaler": y_scaler, "estimator": est,
-                }
+                if self.pca_mode == "split":
+                    split = self._fit_split_pipeline(X, emb_width=Y.shape[1])
+                    Xp = self._transform_split(split, X)
+                    est = self.estimator_factory(Ys.shape[1])
+                    est.fit(Xp, Ys)
+                    self._models[interval] = {
+                        "x_split": split, "y_scaler": y_scaler, "estimator": est,
+                    }
+                else:
+                    x_pipe = self._new_x_pipeline(X)
+                    Xp = x_pipe.fit_transform(X)
+                    est = self.estimator_factory(Ys.shape[1])
+                    est.fit(Xp, Ys)
+                    self._models[interval] = {
+                        "x_pipeline": x_pipe, "y_scaler": y_scaler, "estimator": est,
+                    }
             else:
                 x_scaler = StandardScaler().fit(X)
                 Xs = x_scaler.transform(X)
@@ -144,7 +203,10 @@ class EmbeddingRegressionRetrievalPredictor(CurvePredictor):
         if feat is None:
             return None
         if self.pipeline_x:
-            Xp = mdl["x_pipeline"].transform(feat.reshape(1, -1))
+            if "x_split" in mdl:
+                Xp = self._transform_split(mdl["x_split"], feat.reshape(1, -1))
+            else:
+                Xp = mdl["x_pipeline"].transform(feat.reshape(1, -1))
             Yp = mdl["estimator"].predict(Xp)
             return mdl["y_scaler"].inverse_transform(np.atleast_2d(Yp))[0]
         Xs = mdl["x_scaler"].transform(feat.reshape(1, -1))
@@ -195,6 +257,7 @@ class RidgeRetrievalPredictor(EmbeddingRegressionRetrievalPredictor):
         use_trend: bool = True,
         use_qty_total: bool = False,
         exog_provider=None,
+        pca_mode: str = "joint",
     ) -> None:
         self.alpha = float(alpha)
         self.n_pca = n_pca
@@ -203,11 +266,11 @@ class RidgeRetrievalPredictor(EmbeddingRegressionRetrievalPredictor):
             lags=lags, n_pca_x=n_pca, n_pca_y=None, min_samples=min_samples,
             use_calendar=use_calendar, use_trend=use_trend, use_qty_total=use_qty_total,
             exog_provider=exog_provider, pipeline_x=True, pca_random_state=None,
-            name="ridge_retrieval",
+            pca_mode=pca_mode, name="ridge_retrieval",
         )
 
     def params(self) -> dict:
-        return {
+        p = {
             "model": self.name,
             "lags": "-".join(str(x) for x in self.lags),
             "alpha": self.alpha,
@@ -216,6 +279,9 @@ class RidgeRetrievalPredictor(EmbeddingRegressionRetrievalPredictor):
             "use_calendar": self.use_calendar,
             "use_trend": self.use_trend,
         }
+        if self.pca_mode != "joint":
+            p["pca_mode"] = self.pca_mode
+        return p
 
 
 class GBMRetrievalPredictor(EmbeddingRegressionRetrievalPredictor):

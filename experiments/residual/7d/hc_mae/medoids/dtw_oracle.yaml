@@ -1,0 +1,28 @@
+# CEILING (not deployable). Approximates each auction's residual (demand-minus-supply
+# price spread) curve by one of K medoid curves learned by PAM on a pairwise DTW
+# matrix, picking the medoid closest to the TRUE curve - the best any K-prototype
+# method could do. Uses the answer; included only to bound how much headroom the
+# prototype family has.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: residual.7d.hc_mae.medoids.dtw_oracle
+description: 'Medoid ceiling: the K-medoid residual (demand-minus-supply price spread)
+  curve closest to the true curve under DTW.'
+data:
+  side: residual
+  features: kmedoids
+  split: canonical
+  k: 24
+  lag_days: 7
+predict:
+  strategy: dtw_oracle
+  params: {}
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Medoid ceiling: the K-medoid residual (demand-minus-supply price spread) curve
+  closest to the true curve under DTW.'

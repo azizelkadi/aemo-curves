@@ -1,0 +1,31 @@
+# FDA / Ramsay log-derivative trick (literature proposal #8).
+# FPCA on log(Q'(u)) of the quantile function -> per-interval ridge on those scores
+# -> snap to nearest real curve. Motivated by W1 ~ L1 between inverse-CDFs.
+# lags=[7,8,14].
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.fda.logderiv_fpca
+description: 'FDA: FPCA on the log-derivative of the quantile function + closest-curve snap.'
+data:
+  side: demand
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: logderiv_fpca
+  params:
+    n_components: 12
+    alpha: 100.0
+    lags:
+    - 7
+    - 8
+    - 14
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Proposal #8 (Ramsay log-deriv trick; W1 ~ L1 in inverse-CDF). Per-interval ridge on log-derivative
+  PCA scores, snap to nearest real training curve.'

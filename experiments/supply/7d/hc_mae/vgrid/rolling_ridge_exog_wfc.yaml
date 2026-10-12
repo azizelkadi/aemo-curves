@@ -1,0 +1,36 @@
+# Weather-forecast treatment (supply). rolling_ridge plus exogenous features:
+# market-state proxy (shifted by the 7-day horizon) + a SIMULATED day-7 weather
+# forecast (actual same-day Perth weather perturbed by realistic, per-variable,
+# seeded Gaussian day-7 noise). Honest and deployable: strictly more informative
+# than the stale d-7 weather proxy, without leaking the true target-day weather.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.vgrid.rolling_ridge_exog_wfc
+description: 'v_grid retrieval, rolling ridge refit, with proxy and a simulated day-7
+  weather forecast (actual same-day weather + realistic seeded day-7 noise).'
+data:
+  side: supply
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Headline weather-forecast treatment: proxy + a simulated day-7 Perth weather
+  forecast (actual same-day weather perturbed by realistic seeded day-7 noise). Honest
+  and deployable; strictly more informative than the stale d-7 weather proxy.'
+params:
+  exog:
+    sources:
+    - proxy
+    - weather_fc

@@ -1,0 +1,28 @@
+# Adaptive family: per-row soft blend of the lag-7 baseline curve and the champion's
+# retrieved curve. A gradient-boosted classifier predicts P(baseline beats champion)
+# from leak-safe meta-features; the probability is calibrated with isotonic regression
+# fitted on the walk-forward out-of-fold (p-hat, y) stream, and used directly as the
+# per-row blend weight w (w=1 -> baseline, w=0 -> champion).
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.adaptive.prob_blend
+description: 'Adaptive blend, learned+calibrated: gradient-boosted P(baseline better),
+  isotonic-calibrated on walk-forward OOF, used as the per-row blend weight.'
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: adaptive
+  params:
+    precompute: adaptive_precompute_demand_7d.pkl
+    weight_mode: prob_blend
+    trailing_windows: [7, 28]
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7

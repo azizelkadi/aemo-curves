@@ -1,0 +1,33 @@
+# Prototype prediction. A per-interval ridge predicts the K-vector of DTW distances
+# to the learned medoids from calendar features plus the K-vectors at lags 7, 8, 14
+# and 21 days (all legal at a 7-day horizon); the medoid with the smallest predicted
+# distance is returned as the forecast residual (demand-minus-supply price spread)
+# curve.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: residual.7d.hc_mae.medoids.dtw_predicted
+description: Ridge predicts the K-vector of DTW distances; closest predicted medoid.
+data:
+  side: residual
+  features: kmedoids
+  split: canonical
+  k: 24
+  lag_days: 7
+predict:
+  strategy: dtw_predicted
+  params:
+    query: ridge
+    alpha: 5.0
+    lags:
+    - 7
+    - 8
+    - 14
+    - 21
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Ridge predicts the K-vector of DTW distances; closest predicted medoid.

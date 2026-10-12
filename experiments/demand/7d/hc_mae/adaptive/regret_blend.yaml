@@ -1,0 +1,29 @@
+# Adaptive family: per-row soft blend of the lag-7 baseline curve and the champion's
+# retrieved curve. A gradient-boosted regressor predicts the regret delta = champion
+# error - baseline error from leak-safe meta-features; the blend weight is
+# w = sigmoid(delta-hat / tau), so the baseline gets more weight where the champion is
+# predicted to be worse. tau is picked monthly from a small grid on trailing OOF.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: demand.7d.hc_mae.adaptive.regret_blend
+description: 'Adaptive blend, regret regression: gradient-boosted (champion-minus-baseline
+  error), blend weight = sigmoid(delta-hat / tau), tau grid-picked on trailing OOF.'
+data:
+  side: demand
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: adaptive
+  params:
+    precompute: adaptive_precompute_demand_7d.pkl
+    weight_mode: regret_blend
+    trailing_windows: [7, 28]
+    tau_grid: [5.0, 15.0, 40.0, 100.0]
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7

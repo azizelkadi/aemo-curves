@@ -1,0 +1,38 @@
+# Split-PCA variant with exogenous inputs (the demand-champion config). v_grid
+# stratified k=1 ridge-query retrieval, rolling monthly refit, plus a market-state
+# proxy and weather for the query model. PCA is fitted on the lag-embedding block
+# ONLY; the calendar and exogenous features are standard-scaled and concatenated raw
+# (pca_mode: split). On the residual (demand-minus-supply price spread) curve.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: residual.7d.hc_mae.vgrid.rolling_ridge_exog_split
+description: 'Split-PCA variant (demand-champion config): v_grid retrieval, rolling ridge
+  refit, proxy and weather exogenous features, PCA on the embedding block only, on the
+  residual (demand-minus-supply price spread) curve.'
+data:
+  side: residual
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+    pca_mode: split
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Split-PCA variant (demand-champion config): v_grid retrieval, rolling ridge refit,
+  proxy and weather exogenous features, PCA on the embedding block only, on the residual
+  (demand-minus-supply price spread) curve.'
+params:
+  exog:
+    sources:
+    - proxy
+    - weather

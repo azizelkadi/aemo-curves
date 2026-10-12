@@ -1,0 +1,31 @@
+# Adaptive family: per-row soft blend of the lag-7 baseline curve and the champion's
+# retrieved curve (supply.7d.hc_mae.vgrid.rolling_ridge_exog_split, ~67.19; note the
+# champion LOSES to the 54.83 lag-7 baseline on supply). This CONTROL uses one blend
+# weight per test month, grid-picked (0..1 step 0.05) to minimise the blended HC-MAE
+# on the trailing rows. No per-row information is used.
+#
+# Supply curves are non-DECREASING; the union-breakpoint convex blend is
+# direction-agnostic (a convex mix of two rising curves is rising).
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.adaptive.constant_blend
+description: 'Adaptive blend, constant control: one grid-picked blend weight per test
+  month from trailing blended error.'
+data:
+  side: supply
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: adaptive
+  params:
+    precompute: adaptive_precompute_supply_7d.pkl
+    weight_mode: constant_blend
+    trailing_windows: [7, 28]
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7

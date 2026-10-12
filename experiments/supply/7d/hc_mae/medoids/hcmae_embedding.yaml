@@ -1,0 +1,41 @@
+# Medoid-embedding forecast. Each curve is described by its HC-MAE to 48 medoid
+# curves (features: hcmae_medoids_k48). A ridge model per interval predicts the 48
+# values of the auction 7 days ahead. It is set up as in
+# vgrid.rolling_ridge_exog_proxyonly: monthly refit, PCA 20 and alpha 200, with the
+# 48 values at lag 7, calendar features and the market-state proxy as inputs. The
+# forecast is the pointwise median of the 10 real curves of the same interval, dated
+# 7 to 34 days before the target, whose 48 values are nearest to the prediction.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.medoids.hcmae_embedding
+description: 'Ridge predicts the 48 HC-MAE medoid distances, then the pointwise median
+  of the 10 nearest recent real curves (same interval, last 28 known days).'
+data:
+  side: supply
+  features: hcmae_medoids_k48
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+    bucket: interval
+    pool_max_age_days: 28
+    decode: median_topk
+    top_k: 10
+    range_rule: median
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Ridge on the 48 HC-MAE medoid distances (proxy exog), recent 28-day pool of the
+  same interval, pointwise median of the top 10 retrieved curves.'
+params:
+  exog:
+    sources:
+    - proxy

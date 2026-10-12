@@ -16,12 +16,13 @@ from __future__ import annotations
 import hashlib
 import json
 
-from aemo_curves.config import ARTIFACTS_DIR, DATA_DIR, EMBEDDINGS_DIR
+from aemo_curves.config import ARTIFACTS_DIR, CURVES_DIR, DATA_DIR, EMBEDDINGS_DIR
+from aemo_curves.core.datasets import CANONICAL_ONLY_TABLES
 from aemo_curves.core.experiment import Experiment
 from aemo_curves.core.result import ExperimentResult
 
 CACHE_DIR = ARTIFACTS_DIR / "cache"
-CACHE_VERSION = 1
+CACHE_VERSION = 2
 
 
 def _feature_files(data: dict) -> list:
@@ -31,6 +32,12 @@ def _feature_files(data: dict) -> list:
     k = data.get("k")
     if features == "kmedoids":
         names = [f"train_kmedoids_{side}_k{k}", f"test_kmedoids_{side}_k{k}"]
+    elif features in CANONICAL_ONLY_TABLES:
+        name_tr, name_te, sfx = CANONICAL_ONLY_TABLES[features]
+        names = [f"{name_tr}_{side}_{sfx}", f"{name_te}_{side}_{sfx}"]
+        if features.startswith("hcmae_medoids_"):
+            # the medoid oracle also reads the medoid curves
+            names.append(f"hcmae_medoids_{side}_{sfx}")
     elif features == "v_grid":
         sfx = side if split == "canonical" else f"{side}_{split}"
         names = [f"train_v_grid_{sfx}", f"test_v_grid_{sfx}"]
@@ -41,11 +48,24 @@ def _feature_files(data: dict) -> list:
 
 def _input_files(experiment: Experiment) -> list:
     files = _feature_files(experiment.data)
+    if experiment.predict.get("strategy") == "adaptive":
+        # The adaptive family consumes a precomputed table; fingerprint it so
+        # rebuilding the table invalidates every adaptive experiment.
+        pc = experiment.predict.get("params", {}).get(
+            "precompute", "adaptive_precompute_demand_7d.pkl"
+        )
+        files.append(EMBEDDINGS_DIR / pc)
     if experiment.extra_params.get("exog"):
         side = experiment.data.get("side", "supply")
         files += [EMBEDDINGS_DIR / f"train_{side}.pkl", EMBEDDINGS_DIR / f"test_{side}.pkl"]
-        files += [DATA_DIR / "external" / "weather_example.csv",
+        files += [DATA_DIR / "external" / "weather_au_capitals.csv",
+                  DATA_DIR / "external" / "weather_example.csv",
                   DATA_DIR / "external" / "demand_forecast_example.csv"]
+    # The market-clearing evaluation reads the true supply/demand curve tables on
+    # every experiment, so a curve rebuild must invalidate the cached clearing
+    # numbers.
+    files += [CURVES_DIR / f"{n}.pkl"
+              for n in ("train_supply", "test_supply", "train_demand", "test_demand")]
     return sorted(set(files), key=str)
 
 

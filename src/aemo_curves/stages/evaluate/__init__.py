@@ -8,6 +8,7 @@ from aemo_curves.core.metric import Metric
 from aemo_curves.core.registry import register
 from aemo_curves.stages.evaluate import metrics as _metrics
 from aemo_curves.stages.evaluate._common import attach_baseline, score_predictions, summary_stats
+from aemo_curves.stages.evaluate.clearing import attach_clearing, clearing_summary
 from aemo_curves.stages.evaluate.dtw import (
     curve_dtw_distance,
     curve_dtw_to_set,
@@ -32,6 +33,8 @@ __all__ = [
     "Metric",
     "WASSERSTEIN",
     "attach_baseline",
+    "attach_clearing",
+    "clearing_summary",
     "curve_dtw_distance",
     "curve_dtw_to_set",
     "curve_hc_mae_distance",

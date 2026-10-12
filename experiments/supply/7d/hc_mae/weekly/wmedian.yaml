@@ -1,0 +1,39 @@
+# Learning-free weighted median of lagged curves. At each volume, the forecast
+# price is the weighted median of the same interval's curves at lags 7 (weight 2),
+# 8 to 14, 21 and 28 (weight 1 each). The volume range is the lag-7 curve's own
+# range (range_rule ref). There is no training.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.weekly.wmedian
+description: 'Weighted median of the curves at lags 7 (weight 2), 8 to 14, 21 and 28,
+  on the lag-7 volume range.'
+data:
+  side: supply
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: lag_wmedian
+  params:
+    lags:
+    - [7, 2]
+    - [8, 1]
+    - [9, 1]
+    - [10, 1]
+    - [11, 1]
+    - [12, 1]
+    - [13, 1]
+    - [14, 1]
+    - [21, 1]
+    - [28, 1]
+    range_rule: ref
+    cap_map: null
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Weighted median of the curves at lags 7 (weight 2), 8 to 14, 21 and 28,
+  on the lag-7 volume range.'

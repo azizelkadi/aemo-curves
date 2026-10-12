@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Compute curve embeddings")
-    parser.add_argument("--side", choices=["supply", "demand"], default="supply")
+    parser.add_argument("--side", choices=["supply", "demand", "residual"], default="supply")
     parser.add_argument("--splits", nargs="*", choices=["train", "test"], default=["train", "test"])
     args = parser.parse_args()
 

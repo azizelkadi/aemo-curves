@@ -1,0 +1,29 @@
+# Baseline corrector (shift). A per-interval ridge predicts a single price shift dp
+# from horizon-safe features (lags 7/14/21/28); the prediction is the lag-7 curve with
+# its prices shifted by dp - the real step structure is preserved exactly.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.corrector.shift
+description: Per-interval ridge predicts a single price shift applied to the lag-7 curve.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: shift_corrector
+  params:
+    lags:
+    - 7
+    - 14
+    - 21
+    - 28
+    alpha: 5.0
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Parking-lot 'B1 + residual' family. Preserves the real step structure; only translates it.

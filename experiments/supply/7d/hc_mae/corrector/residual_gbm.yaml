@@ -1,0 +1,27 @@
+# Baseline corrector (nonlinear residual). Same idea as residual_on_baseline but the
+# residual is predicted by a HistGradientBoosting model in PCA-reduced space.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.corrector.residual_gbm
+description: Nonlinear (HistGBM) residual-on-lag-7 corrector in PCA-reduced embedding space.
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: residual_embedding_gbm
+  params:
+    lags:
+    - 7
+    - 14
+    - 21
+    - 28
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Gradient-boosted variant of the residual corrector.

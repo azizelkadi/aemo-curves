@@ -1,0 +1,39 @@
+# Split-PCA variant of the demand champion (vgrid.rolling_ridge_exog). Identical to
+# the champion except PCA is fitted on the lag-embedding block ONLY; the calendar and
+# exogenous features are standard-scaled and concatenated raw (pca_mode: split).
+#
+# Validated at HC-MAE ~122.19 (-1.56 vs the 123.75 joint champion, win-rate 60.8%,
+# better in 9/12 months) on the full test year under the previous weather configuration.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.vgrid.rolling_ridge_exog_split
+description: 'Split-PCA champion variant: v_grid retrieval, rolling ridge refit, proxy
+  and weather exogenous features, PCA on the embedding block only. Validated at ~122.19
+  under the previous weather configuration.'
+data:
+  side: supply
+  features: v_grid
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: rolling_refit
+  params:
+    query: ridge
+    ridge_alpha: 200.0
+    ridge_n_pca: 20
+    pca_mode: split
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: 'Split-PCA champion variant: v_grid retrieval, rolling ridge refit, proxy and
+  weather exogenous features, PCA on the embedding block only. Validated at ~122.19
+  under the previous weather configuration.'
+params:
+  exog:
+    sources:
+    - proxy
+    - weather

@@ -1,3 +1,9 @@
+# Learning-free weekly average. Averages the same interval's curves over the last
+# four same-weekdays (lags 7/14/21/28) in the interp embedding. Smooths single-day
+# noise while preserving the weekly pattern. Strong, zero-training reference.
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
 name: supply.7d.hc_mae.weekly.same_weekday_avg
 description: 'Best learning-free method: average of recent same-weekday curves (interp
   embedding).'

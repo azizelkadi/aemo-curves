@@ -1,3 +1,9 @@
+# CHAMPION (demand). rolling_ridge plus exogenous features (market-state proxy +
+# weather), each shifted by the 7-day horizon so they never peek inside the forecast
+# gap. Best deployable model on demand (HC-MAE ~123.8, -25 vs lag-7).
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
 name: demand.7d.hc_mae.vgrid.rolling_ridge_exog
 description: 'Champion: v_grid retrieval, rolling ridge refit, with proxy and weather
   exogenous features.'

@@ -17,6 +17,14 @@ _FEATURE_TABLES = {
     "v_grid": ("train_v_grid", "test_v_grid"),
 }
 
+# Tables that exist for the canonical split only, as (train name, test name,
+# suffix): the files are `{name}_{side}_{suffix}.pkl`. The HC-MAE medoids were
+# chosen among the canonical train rows, so a recut would move rows that chose
+# the medoids into the test side.
+CANONICAL_ONLY_TABLES = {
+    "hcmae_medoids_k48": ("train_hcmae_medoids", "test_hcmae_medoids", "k48"),
+}
+
 
 def _read_kmedoids(name_tr: str, name_te: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     from aemo_curves.config import EMBEDDINGS_DIR
@@ -35,8 +43,9 @@ def load_features(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Load `(train, test)` feature tables for a side, feature kind, and split.
 
-    `features` is "interp" (64-d), "v_grid", or "kmedoids" (the K-vector of
-    distances to learned prototypes; `k` selects the prototype count). `split`
+    `features` is "interp" (64-d), "v_grid", "kmedoids" (the K-vector of DTW
+    distances to learned prototypes; `k` selects the prototype count) or
+    "hcmae_medoids_k48" (the official HC-MAE to each of 48 medoid curves). `split`
     is "canonical" (the cached split) or a key in `config.SPLITS` (a recut of
     the combined table). The recut reuses the canonical-suffix tables for interp
     and the `f"{side}_<split>"` tables for v_grid.
@@ -47,9 +56,18 @@ def load_features(
         if split != "canonical":
             raise ValueError("features='kmedoids' only supports split='canonical'")
         return _read_kmedoids(f"train_kmedoids_{side}_k{k}", f"test_kmedoids_{side}_k{k}")
+    if features in CANONICAL_ONLY_TABLES:
+        if split != "canonical":
+            raise ValueError(f"features={features!r} only supports split='canonical'")
+        name_tr, name_te, sfx = CANONICAL_ONLY_TABLES[features]
+        return (
+            load_embedding_table(name_tr, f"{side}_{sfx}"),
+            load_embedding_table(name_te, f"{side}_{sfx}"),
+        )
     if features not in _FEATURE_TABLES:
         raise ValueError(
-            f"Unknown features {features!r}; expected 'kmedoids' or one of {sorted(_FEATURE_TABLES)}"
+            f"Unknown features {features!r}; expected 'kmedoids' or one of "
+            f"{sorted(_FEATURE_TABLES) + sorted(CANONICAL_ONLY_TABLES)}"
         )
     name_tr, name_te = _FEATURE_TABLES[features]
     if split == "canonical":

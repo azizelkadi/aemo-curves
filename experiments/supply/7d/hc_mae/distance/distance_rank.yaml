@@ -1,0 +1,29 @@
+# Distance-ranking retrieval. A HistGBM is trained to predict the curve distance
+# between a target and a candidate from the lag-7 context; at inference the candidate
+# with the SMALLEST predicted distance is retrieved. pair_metric=hc_mae aligns the
+# training label with the eval metric. n_candidates_per_target=4 (kept small for
+# memory). Best of the newly-added methods on demand (-11 vs lag-7).
+#
+# Scored under HC-MAE (lower is better) vs the lag-7 baseline on the canonical split.
+
+name: supply.7d.hc_mae.distance.distance_rank
+description: Pointwise distance-ranking retrieval (GBM predicts target-to-candidate distance).
+data:
+  side: supply
+  features: interp
+  split: canonical
+  lag_days: 7
+predict:
+  strategy: distance_rank
+  params:
+    lag_days: 7
+    pair_metric: hc_mae
+    n_candidates_per_target: 4
+evaluate:
+  metric: hc_mae
+  baseline:
+    strategy: lag1
+    params:
+      lag_days: 7
+notes: Parking-lot 'distance ranker' pick. pair_metric=hc_mae aligns the training label with the eval
+  metric. Emits a degeneracy diagnostic (Spearman vs lag-7 L2).

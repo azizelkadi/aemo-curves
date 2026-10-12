@@ -70,10 +70,15 @@ def __getattr__(name):
 from aemo_curves.stages.predict import (
     _orchestration,  # noqa: E402,F401
     _strategies,  # noqa: E402,F401
+    adaptive,  # noqa: E402,F401
+    autoregressive,  # noqa: E402,F401
     dtw_prototype,  # noqa: E402,F401
     from_run,  # noqa: E402,F401
     gate_blend,  # noqa: E402,F401
+    hcmae_medoids,  # noqa: E402,F401
+    lag_median,  # noqa: E402,F401
     selector,  # noqa: E402,F401
+    volume_shift,  # noqa: E402,F401
 )
 
 __all__ = [

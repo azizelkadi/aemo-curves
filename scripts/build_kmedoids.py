@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--side", choices=["supply", "demand"], default="supply")
+    p.add_argument("--side", choices=["supply", "demand", "residual"], default="supply")
     p.add_argument("--k", type=int, default=20, help="Number of medoid prototypes")
     p.add_argument("--sample", type=int, default=480,
                    help="Training rows used to compute the pairwise DTW matrix")
