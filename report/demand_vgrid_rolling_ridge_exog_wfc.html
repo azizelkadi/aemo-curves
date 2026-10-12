@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demand - vgrid.rolling_ridge_exog_wfc</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<a class="back" href="index.html">← Back to index</a>
+<h1>Demand - vgrid.rolling_ridge_exog_wfc</h1>
+<p>The weather features of this model are the measured weather of the delivery day with random noise added, not a real forecast.</p>
+<p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
+<h2>Summary</h2>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>117.41</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>96.21</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>62.9%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>34.88</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>24.93</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>35.45</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>9.70</td><td>5.75</td></tr></tbody></table>
+<h2>Error distribution</h2>
+<figure><img src="assets/demand_vgrid_rolling_ridge_exog_wfc_dist.png" alt="demand vgrid.rolling_ridge_exog_wfc error distribution"></figure>
+<h2>Per-auction improvement</h2>
+<figure><img src="assets/demand_vgrid_rolling_ridge_exog_wfc_improve.png" alt="demand vgrid.rolling_ridge_exog_wfc per-auction improvement"></figure>
+<h2>Error over time</h2>
+<figure><img src="assets/demand_vgrid_rolling_ridge_exog_wfc_time.png" alt="demand vgrid.rolling_ridge_exog_wfc error over time"></figure>
+<h2>Interval by weekday</h2>
+<figure><img src="assets/demand_vgrid_rolling_ridge_exog_wfc_heatmap.png" alt="demand vgrid.rolling_ridge_exog_wfc interval by weekday"></figure>
+<h2>Market clearing error</h2>
+<p>The predicted demand curve is crossed with the true supply curve, and the error is how far this moves the clearing point (V*, P*).</p>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean |ΔV*| (MWh)</td><td>34.88</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>24.93</td><td>23.72</td></tr><tr><td>Win % on |ΔV*|</td><td>42.3%</td><td>-</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>35.45</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>9.70</td><td>5.75</td></tr></tbody></table>
+<p class="note">A few price-floor auctions make the mean of |ΔP*| large, so the median is the summary.</p>
+<figure><img src="assets/demand_vgrid_rolling_ridge_exog_wfc_clearing.png" alt="demand vgrid.rolling_ridge_exog_wfc clearing error"></figure>
+<h2>Example curves</h2>
+<figure><img src="assets/demand_vgrid_rolling_ridge_exog_wfc_examples_best.png" alt="demand vgrid.rolling_ridge_exog_wfc best examples"></figure>
+<figure><img src="assets/demand_vgrid_rolling_ridge_exog_wfc_examples_median.png" alt="demand vgrid.rolling_ridge_exog_wfc median examples"></figure>
+<figure><img src="assets/demand_vgrid_rolling_ridge_exog_wfc_examples_worst.png" alt="demand vgrid.rolling_ridge_exog_wfc worst examples"></figure>
+</body></html>

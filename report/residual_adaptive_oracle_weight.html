@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Residual - adaptive.oracle_weight</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<a class="back" href="index.html">← Back to index</a>
+<h1>Residual - adaptive.oracle_weight</h1>
+<p>This row is a ceiling. It chooses its curve using the true curve, so it is not a forecast.</p>
+<p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
+<h2>Summary</h2>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>139.81</td><td>191.90</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>120.23</td><td>163.16</td></tr><tr><td>Win % vs lag-7</td><td>72.4%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>28.12</td><td>29.23</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>21.44</td><td>22.15</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>25.33</td><td>25.05</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>2.99</td><td>3.09</td></tr></tbody></table>
+<h2>Error distribution</h2>
+<figure><img src="assets/residual_adaptive_oracle_weight_dist.png" alt="residual adaptive.oracle_weight error distribution"></figure>
+<h2>Per-auction improvement</h2>
+<figure><img src="assets/residual_adaptive_oracle_weight_improve.png" alt="residual adaptive.oracle_weight per-auction improvement"></figure>
+<h2>Error over time</h2>
+<figure><img src="assets/residual_adaptive_oracle_weight_time.png" alt="residual adaptive.oracle_weight error over time"></figure>
+<h2>Interval by weekday</h2>
+<figure><img src="assets/residual_adaptive_oracle_weight_heatmap.png" alt="residual adaptive.oracle_weight interval by weekday"></figure>
+<h2>Market clearing error</h2>
+<p>The predicted residual curve is crossed with the $0 line, and the error is how far this moves the clearing point (V*, P*).</p>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean |ΔV*| (MWh)</td><td>28.12</td><td>29.23</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>21.44</td><td>22.15</td></tr><tr><td>Win % on |ΔV*|</td><td>31.4%</td><td>-</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>25.33</td><td>25.05</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>2.99</td><td>3.09</td></tr></tbody></table>
+<p class="note">A few price-floor auctions make the mean of |ΔP*| large, so the median is the summary.</p>
+<figure><img src="assets/residual_adaptive_oracle_weight_clearing.png" alt="residual adaptive.oracle_weight clearing error"></figure>
+<h2>Example curves</h2>
+<figure><img src="assets/residual_adaptive_oracle_weight_examples_best.png" alt="residual adaptive.oracle_weight best examples"></figure>
+<figure><img src="assets/residual_adaptive_oracle_weight_examples_median.png" alt="residual adaptive.oracle_weight median examples"></figure>
+<figure><img src="assets/residual_adaptive_oracle_weight_examples_worst.png" alt="residual adaptive.oracle_weight worst examples"></figure>
+</body></html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demand - diagnostic.oracle_shift</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<a class="back" href="index.html">← Back to index</a>
+<h1>Demand - diagnostic.oracle_shift</h1>
+<p>This row is a ceiling. It chooses its curve using the true curve, so it is not a forecast.</p>
+<p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
+<h2>Summary</h2>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>145.48</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>121.99</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>43.6%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>27.95</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>18.22</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>25.77</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>2.69</td><td>5.75</td></tr></tbody></table>
+<h2>Error distribution</h2>
+<figure><img src="assets/demand_diagnostic_oracle_shift_dist.png" alt="demand diagnostic.oracle_shift error distribution"></figure>
+<h2>Per-auction improvement</h2>
+<figure><img src="assets/demand_diagnostic_oracle_shift_improve.png" alt="demand diagnostic.oracle_shift per-auction improvement"></figure>
+<h2>Error over time</h2>
+<figure><img src="assets/demand_diagnostic_oracle_shift_time.png" alt="demand diagnostic.oracle_shift error over time"></figure>
+<h2>Interval by weekday</h2>
+<figure><img src="assets/demand_diagnostic_oracle_shift_heatmap.png" alt="demand diagnostic.oracle_shift interval by weekday"></figure>
+<h2>Market clearing error</h2>
+<p>The predicted demand curve is crossed with the true supply curve, and the error is how far this moves the clearing point (V*, P*).</p>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean |ΔV*| (MWh)</td><td>27.95</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>18.22</td><td>23.72</td></tr><tr><td>Win % on |ΔV*|</td><td>30.6%</td><td>-</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>25.77</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>2.69</td><td>5.75</td></tr></tbody></table>
+<p class="note">A few price-floor auctions make the mean of |ΔP*| large, so the median is the summary.</p>
+<figure><img src="assets/demand_diagnostic_oracle_shift_clearing.png" alt="demand diagnostic.oracle_shift clearing error"></figure>
+<h2>Example curves</h2>
+<figure><img src="assets/demand_diagnostic_oracle_shift_examples_best.png" alt="demand diagnostic.oracle_shift best examples"></figure>
+<figure><img src="assets/demand_diagnostic_oracle_shift_examples_median.png" alt="demand diagnostic.oracle_shift median examples"></figure>
+<figure><img src="assets/demand_diagnostic_oracle_shift_examples_worst.png" alt="demand diagnostic.oracle_shift worst examples"></figure>
+</body></html>

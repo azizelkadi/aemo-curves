@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demand - medoids.dtw_predicted</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<a class="back" href="index.html">← Back to index</a>
+<h1>Demand - medoids.dtw_predicted</h1>
+<p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
+<h2>Summary</h2>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>185.53</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>161.19</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>40.5%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>31.34</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>25.58</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>32.67</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>7.95</td><td>5.75</td></tr></tbody></table>
+<h2>Error distribution</h2>
+<figure><img src="assets/demand_medoids_dtw_predicted_dist.png" alt="demand medoids.dtw_predicted error distribution"></figure>
+<h2>Per-auction improvement</h2>
+<figure><img src="assets/demand_medoids_dtw_predicted_improve.png" alt="demand medoids.dtw_predicted per-auction improvement"></figure>
+<h2>Error over time</h2>
+<figure><img src="assets/demand_medoids_dtw_predicted_time.png" alt="demand medoids.dtw_predicted error over time"></figure>
+<h2>Interval by weekday</h2>
+<figure><img src="assets/demand_medoids_dtw_predicted_heatmap.png" alt="demand medoids.dtw_predicted interval by weekday"></figure>
+<h2>Market clearing error</h2>
+<p>The predicted demand curve is crossed with the true supply curve, and the error is how far this moves the clearing point (V*, P*).</p>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean |ΔV*| (MWh)</td><td>31.34</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>25.58</td><td>23.72</td></tr><tr><td>Win % on |ΔV*|</td><td>44.2%</td><td>-</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>32.67</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>7.95</td><td>5.75</td></tr></tbody></table>
+<p class="note">A few price-floor auctions make the mean of |ΔP*| large, so the median is the summary.</p>
+<figure><img src="assets/demand_medoids_dtw_predicted_clearing.png" alt="demand medoids.dtw_predicted clearing error"></figure>
+<h2>Example curves</h2>
+<figure><img src="assets/demand_medoids_dtw_predicted_examples_best.png" alt="demand medoids.dtw_predicted best examples"></figure>
+<figure><img src="assets/demand_medoids_dtw_predicted_examples_median.png" alt="demand medoids.dtw_predicted median examples"></figure>
+<figure><img src="assets/demand_medoids_dtw_predicted_examples_worst.png" alt="demand medoids.dtw_predicted worst examples"></figure>
+</body></html>

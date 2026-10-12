@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demand - baseline.lag7</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<a class="back" href="index.html">← Back to index</a>
+<h1>Demand - baseline.lag7</h1>
+<p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions</p>
+<h2>Summary</h2>
+<table><thead><tr><th></th><th>This model</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>0.0%</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>5.75</td></tr></tbody></table>
+<h2>Error distribution</h2>
+<figure><img src="assets/demand_baseline_lag7_dist.png" alt="demand baseline.lag7 error distribution"></figure>
+<h2>Error over time</h2>
+<figure><img src="assets/demand_baseline_lag7_time.png" alt="demand baseline.lag7 error over time"></figure>
+<h2>Market clearing error</h2>
+<p>The predicted demand curve is crossed with the true supply curve, and the error is how far this moves the clearing point (V*, P*).</p>
+<table><thead><tr><th></th><th>This model</th></tr></thead><tbody><tr><td>Mean |ΔV*| (MWh)</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>23.72</td></tr><tr><td>Win % on |ΔV*|</td><td>-</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>5.75</td></tr></tbody></table>
+<p class="note">A few price-floor auctions make the mean of |ΔP*| large, so the median is the summary.</p>
+<figure><img src="assets/demand_baseline_lag7_clearing.png" alt="demand baseline.lag7 clearing error"></figure>
+<h2>Example curves</h2>
+<figure><img src="assets/demand_baseline_lag7_examples_best.png" alt="demand baseline.lag7 best examples"></figure>
+<figure><img src="assets/demand_baseline_lag7_examples_median.png" alt="demand baseline.lag7 median examples"></figure>
+<figure><img src="assets/demand_baseline_lag7_examples_worst.png" alt="demand baseline.lag7 worst examples"></figure>
+</body></html>
