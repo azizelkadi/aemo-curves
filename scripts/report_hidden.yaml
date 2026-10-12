@@ -1,0 +1,63 @@
+# Experiments that stay in results.md but are left out of the report site (tables and detail pages).
+# Every other row of results.md is shown, so a new experiment appears on the site with no change here.
+# Oracle rows follow KEPT_ORACLES in build_static_site.py instead of this file.
+demand:
+  - adaptive.prob_blend
+  - adaptive.prob_blend_raw
+  - adaptive.regret_blend
+  - adaptive.stratum_blend
+  - blend.blended_lag
+  - blend.ema_baseline
+  - blend.learned_blend
+  - corrector.per_day_shift
+  - corrector.residual_gbm
+  - corrector.residual_on_baseline
+  - corrector.shift
+  - corrector.shift_scale
+  - diagnostic.realized_shift
+  - distance.distance_rank
+  - fda.fof_snap
+  - fda.logderiv_fpca
+  - metric_learn.wasserstein_metric
+  - probabilistic.ngboost_per_slice
+  - retrieval.gbm_retrieval
+  - retrieval.soft_knn
+  - vgrid.rolling_ridge
+  - vgrid.rolling_ridge_exog
+  - vgrid.rolling_ridge_exog_split
+  - vgrid.rolling_ridge_exog_split_ar
+  - vgrid.rolling_ridge_exog_wfc_ar
+  - vgrid.strat_knn
+  - weekly.same_weekday_avg
+supply:
+  - adaptive.stratum_blend
+  - blend.blended_lag
+  - blend.ema_baseline
+  - blend.learned_blend
+  - corrector.per_day_shift
+  - corrector.residual_gbm
+  - corrector.residual_on_baseline
+  - corrector.shift
+  - corrector.shift_scale
+  - diagnostic.realized_shift
+  - distance.distance_rank
+  - fda.fof_snap
+  - fda.logderiv_fpca
+  - metric_learn.wasserstein_metric
+  - retrieval.gbm_retrieval
+  - retrieval.soft_knn
+  - vgrid.rolling_ridge
+  - vgrid.rolling_ridge_exog
+  - vgrid.rolling_ridge_exog_split
+  - vgrid.rolling_ridge_exog_split_ar
+  - vgrid.rolling_ridge_exog_wfc
+  - vgrid.strat_knn
+  - weekly.same_weekday_avg
+residual:
+  - adaptive.stratum_blend
+  - blend.ema_baseline
+  - corrector.shift_scale
+  - vgrid.rolling_ridge
+  - vgrid.rolling_ridge_exog_split_ar
+  - vgrid.strat_knn
+  - weekly.same_weekday_avg

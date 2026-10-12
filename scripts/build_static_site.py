@@ -2,6 +2,8 @@
 
 The index is assembled from HTML fragments (one per narrative section) plus one
 results table per side, parsed from ``experiments/<side>/7d/hc_mae/results.md``.
+Every row of results.md is shown except the names listed in
+``scripts/report_hidden.yaml`` and the oracles missing from ``KEPT_ORACLES``.
 Detail pages are generated for a small set of rows and read their numbers from the
 cached prediction frames (``artifacts/cache/<key>/predictions.pkl`` next to a
 ``result.json``).
@@ -26,6 +28,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import yaml
 
 # --------------------------------------------------------------------------- #
 # paths / figure module import
@@ -103,6 +106,18 @@ EXTRA_PAGES = {
     "demand": ("vgrid.rolling_ridge_exog_wfc", "medoids.dtw_predicted"),
     "supply": ("medoids.dtw_predicted",),
 }
+HIDDEN_FILE = SCRIPTS_DIR / "report_hidden.yaml"
+
+
+def load_hidden() -> dict[str, set[str]]:
+    """Per-side experiment names that the site leaves out (rows and detail pages)."""
+    if not HIDDEN_FILE.exists():
+        return {}
+    raw = yaml.safe_load(HIDDEN_FILE.read_text(encoding="utf-8")) or {}
+    return {side: set(names or ()) for side, names in raw.items()}
+
+
+HIDDEN = load_hidden()
 
 # columns kept from every frame (embeddings / retrieval cols are trimmed for memory)
 CORE_COLS = [
@@ -259,7 +274,16 @@ def parse_results_md(side: str) -> list[dict]:
                 "kind": classify_kind(name),
             }
         )
-    return [r for r in rows if r["kind"] == "forecast" or r["name"] in KEPT_ORACLES]
+    hidden = HIDDEN.get(side, set())
+    if BASELINE_NAME in hidden:
+        warn(f"{HIDDEN_FILE.name} lists the baseline for {side}, it stays shown")
+        hidden = hidden - {BASELINE_NAME}
+    for name in sorted(hidden - {r["name"] for r in rows}):
+        warn(f"{HIDDEN_FILE.name}: {side} has no row {name!r}")
+    return [
+        r for r in rows
+        if (r["kind"] == "forecast" or r["name"] in KEPT_ORACLES) and r["name"] not in hidden
+    ]
 
 
 def select_page_rows(rows: list[dict], side: str) -> dict[str, dict]:

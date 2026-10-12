@@ -12,7 +12,7 @@
 
 <p>Exogenous features are the extra daily numbers a model may add to the curve numbers and the calendar features. Two sources of them are used: daily summaries of the market itself and daily weather values for Perth.</p>
 
-<p>The rows marked Baseline in the results tables are learning-free models, so nothing is fitted. The lag-7 baseline (baseline.lag7) returns the curve of the same interval 7 days earlier without any change, and every Δ and every Win % below is measured against it. The same-weekday average (weekly.same_weekday_avg) takes the mean of the interp embeddings of the same interval on the four most recent same weekdays, which are 7, 14, 21 and 28 days earlier. Its curve carries the averaged prices, and its total volume is the average of the four total volumes.</p>
+<p>The rows marked Baseline in the results tables are learning-free models, so nothing is fitted. The lag-7 baseline (baseline.lag7) returns the curve of the same interval 7 days earlier without any change, and every Δ and every Win % below is measured against it.</p>
 
 <p>The weighted median (weekly.wmedian) builds a new step curve from the curves of the same interval 7, 8, 9, 10, 11, 12, 13, 14, 21 and 28 days earlier. At each volume, its price is the weighted median of the prices of these 10 curves at that volume. The lag-7 curve has weight 2 and every other curve has weight 1, so the total weight is 11 and the price at each volume is one of the 10 prices. A curve's start volume is the end of its first step, and its end volume is the end of its last step. For demand and residual, the forecast starts at the median of the 10 start volumes and ends at the median of the 10 end volumes. For supply, it starts and ends where the lag-7 curve does.</p>
 

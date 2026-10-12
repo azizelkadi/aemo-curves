@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supply - vgrid.rolling_ridge_exog_proxyonly</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<a class="back" href="index.html">← Back to index</a>
+<h1>Supply - vgrid.rolling_ridge_exog_proxyonly</h1>
+<p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
+<h2>Summary</h2>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>68.04</td><td>54.83</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>58.34</td><td>45.35</td></tr><tr><td>Win % vs lag-7</td><td>41.0%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>39.02</td><td>33.66</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>24.33</td><td>18.75</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>29.24</td><td>31.48</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>2.98</td><td>2.06</td></tr></tbody></table>
+<h2>Error distribution</h2>
+<figure><img src="assets/supply_vgrid_rolling_ridge_exog_proxyonly_dist.png" alt="supply vgrid.rolling_ridge_exog_proxyonly error distribution"></figure>
+<h2>Per-auction improvement</h2>
+<figure><img src="assets/supply_vgrid_rolling_ridge_exog_proxyonly_improve.png" alt="supply vgrid.rolling_ridge_exog_proxyonly per-auction improvement"></figure>
+<h2>Error over time</h2>
+<figure><img src="assets/supply_vgrid_rolling_ridge_exog_proxyonly_time.png" alt="supply vgrid.rolling_ridge_exog_proxyonly error over time"></figure>
+<h2>Interval by weekday</h2>
+<figure><img src="assets/supply_vgrid_rolling_ridge_exog_proxyonly_heatmap.png" alt="supply vgrid.rolling_ridge_exog_proxyonly interval by weekday"></figure>
+<h2>Market clearing error</h2>
+<p>The true demand curve is crossed with the predicted supply curve, and the error is how far this moves the clearing point (V*, P*).</p>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean |ΔV*| (MWh)</td><td>39.02</td><td>33.66</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>24.33</td><td>18.75</td></tr><tr><td>Win % on |ΔV*|</td><td>36.6%</td><td>-</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>29.24</td><td>31.48</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>2.98</td><td>2.06</td></tr></tbody></table>
+<p class="note">A few price-floor auctions make the mean of |ΔP*| large, so the median is the summary.</p>
+<figure><img src="assets/supply_vgrid_rolling_ridge_exog_proxyonly_clearing.png" alt="supply vgrid.rolling_ridge_exog_proxyonly clearing error"></figure>
+<h2>Example curves</h2>
+<figure><img src="assets/supply_vgrid_rolling_ridge_exog_proxyonly_examples_best.png" alt="supply vgrid.rolling_ridge_exog_proxyonly best examples"></figure>
+<figure><img src="assets/supply_vgrid_rolling_ridge_exog_proxyonly_examples_median.png" alt="supply vgrid.rolling_ridge_exog_proxyonly median examples"></figure>
+<figure><img src="assets/supply_vgrid_rolling_ridge_exog_proxyonly_examples_worst.png" alt="supply vgrid.rolling_ridge_exog_proxyonly worst examples"></figure>
+</body></html>

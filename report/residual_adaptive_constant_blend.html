@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Residual - adaptive.constant_blend</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<a class="back" href="index.html">← Back to index</a>
+<h1>Residual - adaptive.constant_blend</h1>
+<p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
+<h2>Summary</h2>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>177.25</td><td>191.90</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>160.77</td><td>163.16</td></tr><tr><td>Win % vs lag-7</td><td>55.5%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>27.50</td><td>29.23</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>20.88</td><td>22.15</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>24.10</td><td>25.05</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>2.74</td><td>3.09</td></tr></tbody></table>
+<h2>Error distribution</h2>
+<figure><img src="assets/residual_adaptive_constant_blend_dist.png" alt="residual adaptive.constant_blend error distribution"></figure>
+<h2>Per-auction improvement</h2>
+<figure><img src="assets/residual_adaptive_constant_blend_improve.png" alt="residual adaptive.constant_blend per-auction improvement"></figure>
+<h2>Error over time</h2>
+<figure><img src="assets/residual_adaptive_constant_blend_time.png" alt="residual adaptive.constant_blend error over time"></figure>
+<h2>Interval by weekday</h2>
+<figure><img src="assets/residual_adaptive_constant_blend_heatmap.png" alt="residual adaptive.constant_blend interval by weekday"></figure>
+<h2>Market clearing error</h2>
+<p>The predicted residual curve is crossed with the $0 line, and the error is how far this moves the clearing point (V*, P*).</p>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean |ΔV*| (MWh)</td><td>27.50</td><td>29.23</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>20.88</td><td>22.15</td></tr><tr><td>Win % on |ΔV*|</td><td>45.7%</td><td>-</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>24.10</td><td>25.05</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>2.74</td><td>3.09</td></tr></tbody></table>
+<p class="note">A few price-floor auctions make the mean of |ΔP*| large, so the median is the summary.</p>
+<figure><img src="assets/residual_adaptive_constant_blend_clearing.png" alt="residual adaptive.constant_blend clearing error"></figure>
+<h2>Example curves</h2>
+<figure><img src="assets/residual_adaptive_constant_blend_examples_best.png" alt="residual adaptive.constant_blend best examples"></figure>
+<figure><img src="assets/residual_adaptive_constant_blend_examples_median.png" alt="residual adaptive.constant_blend median examples"></figure>
+<figure><img src="assets/residual_adaptive_constant_blend_examples_worst.png" alt="residual adaptive.constant_blend worst examples"></figure>
+</body></html>
