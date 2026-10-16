@@ -92,7 +92,6 @@ SIDES: dict[str, dict] = {
 SIDE_ORDER = ["demand", "supply", "residual"]
 
 BASELINE_NAME = "baseline.lag7"
-ORACLE_NAME = "vgrid.rolling_oracle"
 # One oracle row per family is shown. Every other oracle row is left out of the tables.
 KEPT_ORACLES = {
     "vgrid.rolling_oracle",
@@ -100,11 +99,14 @@ KEPT_ORACLES = {
     "adaptive.oracle_weight",
     "diagnostic.oracle_shift",
 }
-PAGE_FAMILIES = ["Retrieval", "Adaptive", "Medoids"]
-# Rows that get a detail page in that scenario even when they are not the best of their family.
-EXTRA_PAGES = {
-    "demand": ("vgrid.rolling_ridge_exog_wfc", "medoids.dtw_predicted"),
-    "supply": ("medoids.dtw_predicted",),
+# Index section that describes the models of each family, linked from every detail page.
+FAMILY_SECTION = {
+    "Baseline": ("data", "Data"),
+    "Retrieval": ("method-1", "Method 1: Retrieval"),
+    "Medoids": ("method-2", "Method 2: Medoids"),
+    "Adaptive": ("method-3", "Method 3: Adaptive"),
+    "Diagnostic": ("results", "Results"),
+    "Other": ("results", "Results"),
 }
 HIDDEN_FILE = SCRIPTS_DIR / "report_hidden.yaml"
 
@@ -286,34 +288,9 @@ def parse_results_md(side: str) -> list[dict]:
     ]
 
 
-def select_page_rows(rows: list[dict], side: str) -> dict[str, dict]:
-    """Rows that get a detail page: baseline, rolling oracle, best forecast per family,
-    and the scenario's EXTRA_PAGES."""
-    by_name = {r["name"]: r for r in rows}
-    picks: dict[str, dict] = {}
-    for must in (BASELINE_NAME, ORACLE_NAME):
-        row = by_name.get(must)
-        if row is None:
-            warn(f"leaderboard has no row {must!r}, no detail page for it")
-            continue
-        picks[must] = row
-    for name in sorted(KEPT_ORACLES):
-        if name in by_name:
-            picks.setdefault(name, by_name[name])
-    for family in PAGE_FAMILIES:
-        cands = [r for r in rows if r["family"] == family and r["kind"] == "forecast"]
-        if not cands:
-            continue
-        best = min(cands, key=lambda r: r["hc"])
-        picks.setdefault(best["name"], best)
-    for name in EXTRA_PAGES.get(side, ()):
-        row = by_name.get(name)
-        if row is None:
-            warn(f"leaderboard has no row {name!r}, no detail page for it")
-            continue
-        picks.setdefault(name, row)
-    return picks
-
+def select_page_rows(rows: list[dict]) -> dict[str, dict]:
+    """Every row of the table gets a detail page."""
+    return {r["name"]: r for r in rows}
 
 def slug_of(name: str) -> str:
     return name.replace(".", "_")
@@ -617,6 +594,11 @@ def build_detail_page(
     parts: list[str] = []
     parts.append('<a class="back" href="index.html">← Back to index</a>')
     parts.append(f"<h1>{title}</h1>")
+    anchor, section = FAMILY_SECTION[classify_family(name)]
+    parts.append(
+        f'<p>The index section <a href="index.html#{anchor}">{section}</a> describes how this '
+        "model works.</p>"
+    )
     low = name.lower()
     if "wactual" in low:
         parts.append(f"<p>{WACTUAL_NOTE}</p>")
@@ -684,7 +666,7 @@ def _clean_side_files(side: str) -> None:
 def build_side(side: str) -> dict:
     cfg = SIDES[side]
     rows = parse_results_md(side)
-    picks = select_page_rows(rows, side)
+    picks = select_page_rows(rows)
     _clean_side_files(side)
 
     pages: dict[str, str] = {}

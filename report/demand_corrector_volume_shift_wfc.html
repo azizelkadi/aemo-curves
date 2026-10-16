@@ -1,0 +1,30 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demand - corrector.volume_shift_wfc</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<a class="back" href="index.html">← Back to index</a>
+<h1>Demand - corrector.volume_shift_wfc</h1>
+<p>The index section <a href="index.html#results">Results</a> describes how this model works.</p>
+<p>The weather features of this model are the measured weather of the delivery day with random noise added, not a real forecast.</p>
+<p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
+<h2>Summary</h2>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>109.95</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>90.29</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>66.0%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>37.77</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>25.12</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>43.47</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>9.07</td><td>5.75</td></tr></tbody></table>
+<h2>Error distribution</h2>
+<figure><img src="assets/demand_corrector_volume_shift_wfc_dist.png" alt="demand corrector.volume_shift_wfc error distribution"></figure>
+<h2>Per-auction improvement</h2>
+<figure><img src="assets/demand_corrector_volume_shift_wfc_improve.png" alt="demand corrector.volume_shift_wfc per-auction improvement"></figure>
+<h2>Error over time</h2>
+<figure><img src="assets/demand_corrector_volume_shift_wfc_time.png" alt="demand corrector.volume_shift_wfc error over time"></figure>
+<h2>Interval by weekday</h2>
+<figure><img src="assets/demand_corrector_volume_shift_wfc_heatmap.png" alt="demand corrector.volume_shift_wfc interval by weekday"></figure>
+<h2>Market clearing error</h2>
+<p>The predicted demand curve is crossed with the true supply curve, and the error is how far this moves the clearing point (V*, P*).</p>
+<table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean |ΔV*| (MWh)</td><td>37.77</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>25.12</td><td>23.72</td></tr><tr><td>Win % on |ΔV*|</td><td>41.2%</td><td>-</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>43.47</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>9.07</td><td>5.75</td></tr></tbody></table>
+<p class="note">A few price-floor auctions make the mean of |ΔP*| large, so the median is the summary.</p>
+<figure><img src="assets/demand_corrector_volume_shift_wfc_clearing.png" alt="demand corrector.volume_shift_wfc clearing error"></figure>
+<h2>Example curves</h2>
+<figure><img src="assets/demand_corrector_volume_shift_wfc_examples_best.png" alt="demand corrector.volume_shift_wfc best examples"></figure>
+<figure><img src="assets/demand_corrector_volume_shift_wfc_examples_median.png" alt="demand corrector.volume_shift_wfc median examples"></figure>
+<figure><img src="assets/demand_corrector_volume_shift_wfc_examples_worst.png" alt="demand corrector.volume_shift_wfc worst examples"></figure>
+</body></html>
