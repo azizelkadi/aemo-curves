@@ -99,7 +99,9 @@ KEPT_ORACLES = {
     "adaptive.oracle_weight",
     "diagnostic.oracle_shift",
 }
-# Index section that describes the models of each family, linked from every detail page.
+# Optional per-experiment text shown first on its detail page, named <experiment>.html.
+MODEL_TEXT_DIR = DEFAULT_SECTIONS_DIR / "models"
+# Index section that describes the models of each family, linked from detail pages without their own text.
 FAMILY_SECTION = {
     "Baseline": ("data", "Data"),
     "Retrieval": ("method-1", "Method 1: Retrieval"),
@@ -594,18 +596,23 @@ def build_detail_page(
     parts: list[str] = []
     parts.append('<a class="back" href="index.html">← Back to index</a>')
     parts.append(f"<h1>{title}</h1>")
-    anchor, section = FAMILY_SECTION[classify_family(name)]
-    parts.append(
-        f'<p>The index section <a href="index.html#{anchor}">{section}</a> describes how this '
-        "model works.</p>"
-    )
-    low = name.lower()
-    if "wactual" in low:
-        parts.append(f"<p>{WACTUAL_NOTE}</p>")
-    elif classify_kind(name) == "oracle":
-        parts.append(f"<p>{ORACLE_NOTE}</p>")
-    if "wfc" in low:
-        parts.append(f"<p>{WFC_NOTE}</p>")
+    model_text = MODEL_TEXT_DIR / f"{name}.html"
+    if model_text.exists():
+        # The model's own text comes first and carries its caveats.
+        parts.append(model_text.read_text(encoding="utf-8"))
+    else:
+        anchor, section = FAMILY_SECTION[classify_family(name)]
+        parts.append(
+            f'<p>The index section <a href="index.html#{anchor}">{section}</a> describes how this '
+            "model works.</p>"
+        )
+        low = name.lower()
+        if "wactual" in low:
+            parts.append(f"<p>{WACTUAL_NOTE}</p>")
+        elif classify_kind(name) == "oracle":
+            parts.append(f"<p>{ORACLE_NOTE}</p>")
+        if "wfc" in low:
+            parts.append(f"<p>{WFC_NOTE}</p>")
     subtitle = "7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions"
     if comparative:
         subtitle += " · reference: lag-7 baseline"
