@@ -1,0 +1,6 @@
+<h2>How it works</h2>
+<p>Nothing is fitted. The forecast is a new step curve built from the curves of the same interval 7, 8, 9, 10, 11, 12, 13, 14, 21 and 28 days earlier.</p>
+<ol>
+<li><b>Median.</b> At each volume, the forecast price is the weighted median of the prices of these 10 curves at that volume. The lag-7 curve has weight 2 and every other curve has weight 1, so the total weight is 11 and the price at each volume is one of the 10 prices.</li>
+<li><b>Volume range.</b> A curve's start volume is the end of its first step, and its end volume is the end of its last step. For demand and residual, the forecast starts at the median of the 10 start volumes and ends at the median of the 10 end volumes. For supply, it starts and ends where the lag-7 curve does.</li>
+</ol>

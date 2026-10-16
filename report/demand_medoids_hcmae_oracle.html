@@ -5,8 +5,11 @@
 </head><body>
 <a class="back" href="index.html">← Back to index</a>
 <h1>Demand - medoids.hcmae_oracle</h1>
-<p>The index section <a href="index.html#method-2">Method 2: Medoids</a> describes how this model works.</p>
-<p>This row is a ceiling. It chooses its curve using the true curve, so it is not a forecast.</p>
+<h2>How it works</h2>
+<p>A medoid is a real training curve chosen by k-medoids to stand for a group of curves. This scenario has 48 medoids chosen with HC-MAE, the score of this site, as the distance.</p>
+<p>The 48 medoids are real training curves chosen under HC-MAE, from the training window only (1 January 2021 to 30 April 2024). The search reads each curve at 2,048 equally spaced volumes, which gives a fast approximation of HC-MAE. It runs FasterPAM, a fast version of Partition Around Medoids, on a sample of 12,000 training curves spread evenly over the months and intervals. Then, on all training curves, each curve is assigned to its nearest medoid, and a medoid moves to another curve of its group when that lowers the summed distance to the curves of the group, for at most 6 rounds.</p>
+<p>This row reads the true curve, so it is not a forecast. For each auction it returns the medoid with the smallest HC-MAE to the true curve. Its score is the best that any method returning one of these 48 medoids can reach.</p>
+
 <p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
 <h2>Summary</h2>
 <table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>22.07</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>19.33</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>95.4%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>26.67</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>20.85</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>39.48</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>13.82</td><td>5.75</td></tr></tbody></table>

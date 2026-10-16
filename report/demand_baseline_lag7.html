@@ -5,7 +5,9 @@
 </head><body>
 <a class="back" href="index.html">← Back to index</a>
 <h1>Demand - baseline.lag7</h1>
-<p>The index section <a href="index.html#data">Data</a> describes how this model works.</p>
+<h2>How it works</h2>
+<p>The forecast of an auction is the curve of the same interval 7 days earlier, without any change. The forecast horizon is 7 days, so this is the newest curve known at forecast time. Nothing is fitted. Every Δ and every Win % on this site is measured against this model on the same auctions.</p>
+
 <p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions</p>
 <h2>Summary</h2>
 <table><thead><tr><th></th><th>This model</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>0.0%</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>5.75</td></tr></tbody></table>

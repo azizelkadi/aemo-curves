@@ -5,7 +5,11 @@
 </head><body>
 <a class="back" href="index.html">← Back to index</a>
 <h1>Demand - adaptive.constant_blend</h1>
-<p>The index section <a href="index.html#method-3">Method 3: Adaptive</a> describes how this model works.</p>
+<h2>How it works</h2>
+<p>The model mixes two curves with one weight per test month.</p>
+<p>The two candidates are the lag-7 baseline curve and the curve returned by vgrid.rolling_ridge_exog_split of the same scenario. A weight w between 0 and 1 sets the mix: w = 1 keeps the baseline curve and w = 0 keeps the retrieval curve. For a weight strictly between 0 and 1, the two curves are read at every break-point of both curves and their prices are averaged with weights w and 1 - w. The blended curve therefore spans the volume range of both curves, and it ends at the later of the two last edges. At w = 1 and w = 0 the original curve is returned unchanged.</p>
+<p>The weight is picked again at the start of every test month, from the grid 0 to 1 in steps of 0.05. It is the grid value with the smallest mean HC-MAE between the blended curves and the true curves of the earlier auctions, which are the auctions dated from 1 November 2023 to the first day of the month minus 7 days. When there are more than 3,000 earlier auctions, the grid is scored on a fixed random subsample of 3,000 of them. The month's weight is then used for all its auctions.</p>
+
 <p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
 <h2>Summary</h2>
 <table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>119.26</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>97.52</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>61.9%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>33.66</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>24.30</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>34.49</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>9.11</td><td>5.75</td></tr></tbody></table>

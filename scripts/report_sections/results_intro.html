@@ -8,10 +8,10 @@
 
 <p>The mark "(oracle)" after the family name means the row reads the true curve, so it is not available at forecast time. Four families show one oracle row each: vgrid.rolling_oracle, medoids.hcmae_oracle, adaptive.oracle_weight and diagnostic.oracle_shift (residual has no Diagnostic rows). Each of them is described above with its family.</p>
 
-<p>The row colours follow the score. The lag-7 baseline row is grey. Rows that score better than the baseline are green, and the green is stronger for a lower HC-MAE. Rows that score worse than the baseline go from yellow to orange to red as HC-MAE rises. Oracle rows are blue.</p>
+<p>The row colours follow the score. The lag-7 baseline row is grey and oracle rows are blue. A forecast row is green when its HC-MAE is lower than the baseline's, and red when it is not.</p>
 
 <p>HC-MAE is the score. It reads the predicted curve and the true curve at 10,000 equally spaced volumes that span both curves, and it averages the absolute price difference. The unit is $/MWh and lower is better. Δ vs lag-7 is the score minus the score of the lag-7 baseline on the same auctions, so a negative value means the model is better than the baseline. The 95% CI is a confidence interval for that difference from a cluster bootstrap that resamples whole trading days (2,000 resamples, seed 42). A "*" after the interval means the whole interval is below 0 and a Holm-corrected one-sided Wilcoxon signed-rank test gives p &lt; 0.05. The correction covers all the non-baseline experiments in the results.md file of the scenario, including the experiments that the table does not list. Win % is the share of the 17,232 auctions where the model's error is smaller than the baseline's error.</p>
 
 <p>The last two columns measure the error in market terms. We cross the predicted curve with the true curve of the other side (the residual curve is crossed with the $0 line) to get a predicted clearing volume V*. We then read the clearing price P* off the true supply curve at that volume. |ΔV*| in MWh and |ΔP*| in $/MWh are how far the prediction moves the clearing point away from the true one. A few price-floor auctions make the mean of |ΔP*| large, so the median is the summary. These two columns are reported next to the score and never used for ranking.</p>
 
-<p>Every row links to a detail page. Each detail page also links back to the section of this page that describes how its model works.</p>
+<p>Every row links to a detail page. Each detail page starts with an explanation of how its model works.</p>

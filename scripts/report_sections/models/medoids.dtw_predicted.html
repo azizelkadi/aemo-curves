@@ -1,0 +1,8 @@
+<h2>How it works</h2>
+<p>A medoid is a real training curve chosen by k-medoids to stand for a group of curves. This model uses medoids chosen with Dynamic Time Warping (DTW) as the distance.</p>
+<ol>
+<li><b>DTW.</b> DTW matches the steps of one curve to the steps of another, and it may match one step to several, so two curves with a different number of steps can be compared. Each step is a point with two coordinates, the price and the volume. The volume is divided by the curve total and multiplied by 50, so both coordinates count about the same. Matched points are at most 10 positions apart. The dissimilarity is the square root of the summed squared distances between the matched points.</li>
+<li><b>Medoids.</b> On a subsample of 480 training curves, spread evenly over the 48 intervals, k-medoids (Partition Around Medoids) picks K medoids: 24 for demand, 20 for supply and 24 for residual.</li>
+<li><b>Embedding.</b> Any curve is described by K numbers, its DTW dissimilarity to each medoid.</li>
+<li><b>Forecast.</b> One ridge regression per interval, with penalty 5.0, predicts the K numbers of the delivery day from the K numbers of the same interval 7, 8, 14 and 21 days earlier, plus five calendar features. The forecast is the medoid with the smallest predicted dissimilarity.</li>
+</ol>

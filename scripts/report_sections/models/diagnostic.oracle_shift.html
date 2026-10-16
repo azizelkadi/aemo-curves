@@ -1,0 +1,3 @@
+<h2>How it works</h2>
+<p>This row reads the true curve, so it is not a forecast. It measures how much a single price shift of the lag-7 curve can do.</p>
+<p>It adds one amount to every price of the lag-7 curve, so the whole curve moves up or down without changing its shape. The amount is the median price difference between the true curve and the lag-7 curve, both read at the 64 positions of the interp embedding, which are 64 shares of the curve's own total volume evenly spaced from 2% to 98%.</p>

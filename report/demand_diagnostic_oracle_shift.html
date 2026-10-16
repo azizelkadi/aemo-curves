@@ -5,8 +5,10 @@
 </head><body>
 <a class="back" href="index.html">← Back to index</a>
 <h1>Demand - diagnostic.oracle_shift</h1>
-<p>The index section <a href="index.html#results">Results</a> describes how this model works.</p>
-<p>This row is a ceiling. It chooses its curve using the true curve, so it is not a forecast.</p>
+<h2>How it works</h2>
+<p>This row reads the true curve, so it is not a forecast. It measures how much a single price shift of the lag-7 curve can do.</p>
+<p>It adds one amount to every price of the lag-7 curve, so the whole curve moves up or down without changing its shape. The amount is the median price difference between the true curve and the lag-7 curve, both read at the 64 positions of the interp embedding, which are 64 shares of the curve's own total volume evenly spaced from 2% to 98%.</p>
+
 <p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
 <h2>Summary</h2>
 <table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>145.48</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>121.99</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>43.6%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>27.95</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>18.22</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>25.77</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>2.69</td><td>5.75</td></tr></tbody></table>

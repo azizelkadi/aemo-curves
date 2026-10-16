@@ -5,8 +5,18 @@
 </head><body>
 <a class="back" href="index.html">← Back to index</a>
 <h1>Demand - vgrid.recent_median_wfc</h1>
-<p>The index section <a href="index.html#method-1">Method 1: Retrieval</a> describes how this model works.</p>
-<p>The weather features of this model are the measured weather of the delivery day with random noise added, not a real forecast.</p>
+<h2>How it works</h2>
+<p>The model works on the v-grid embedding: the prices of a curve read at 64 volumes evenly spaced from 0 to a fixed volume cap. The cap is a high percentile of the total volume of the training auctions, 99 for demand and residual and 99.9 for supply, so the same position always means the same volume in every auction.</p>
+<ol>
+<li><b>Query.</b> For each of the 48 intervals, one ridge regression predicts the 64 numbers of the delivery day D from the 64 numbers of the same interval 7 days earlier, five calendar features (the day of week as a sine and a cosine, a weekend flag, and the month as a sine and a cosine) and the market-state proxy and weather_fc. The features are standardised and reduced to 20 principal components, and the ridge penalty is 200.</li>
+<li><b>Candidates.</b> The candidate set holds the curves of the same interval on any weekday, dated from 34 to 7 days before the delivery day D. These 28 days are the newest days known at forecast time, so the set moves with D.</li>
+<li><b>Median.</b> The 5 candidates closest to the query are taken together with the curves of the same interval 7, 8, 9, 10, 11, 12, 13, 14, 21 and 28 days earlier, which gives 15 curves. At each volume, the forecast price is the weighted median of the prices of these 15 curves. Each candidate has weight 1, the lag-7 curve has weight 3, the curves 21 and 28 days earlier have weight 2, and the other lagged curves have weight 1. The total weight is 19, so the price at each volume is one of the 15 prices.</li>
+<li><b>Volume range.</b> The forecast starts at the median of the 15 start volumes and ends at the median of the 15 end volumes.</li>
+<li><b>Refit.</b> The model refits at the start of every test month on the auctions dated on or before the first day of that month minus 7 days. That data includes the earlier test months.</li>
+</ol>
+<p>The market-state proxy holds thirteen daily numbers, all read from the day 7 days before the delivery day. Five describe that day's prices and volume: the mean, median and spread of the prices, the total volume, and the number of bid or offer rows. Two are read from that day's interp embeddings: the mean length of the 64-number vectors and their mean price range. The other six are trend numbers: the 7-day and 28-day trailing mean price, two price trends, a price z-score and a volume trend. The proxy also adds the day of year as a sine and a cosine, and Western Australian holiday flags.</p>
+<p>weather_fc is ten daily Perth weather values measured on the delivery day itself, with random noise added per variable: the highest, lowest and mean temperature, the highest apparent temperature, rain, the highest and mean wind speed, solar radiation, humidity and surface pressure. The noise size per variable comes from ECMWF and WeatherReal day-7 verification numbers. It is a simulated forecast and not a real one, so this score is an upper bound.</p>
+
 <p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
 <h2>Summary</h2>
 <table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>116.41</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>95.14</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>67.2%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>28.45</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>19.82</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>27.48</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>3.50</td><td>5.75</td></tr></tbody></table>

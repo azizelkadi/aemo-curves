@@ -5,8 +5,10 @@
 </head><body>
 <a class="back" href="index.html">← Back to index</a>
 <h1>Residual - vgrid.rolling_oracle</h1>
-<p>The index section <a href="index.html#method-1">Method 1: Retrieval</a> describes how this model works.</p>
-<p>This row is a ceiling. It chooses its curve using the true curve, so it is not a forecast.</p>
+<h2>How it works</h2>
+<p>The model works on the v-grid embedding: the prices of a curve read at 64 volumes evenly spaced from 0 to a fixed volume cap. The cap is a high percentile of the total volume of the training auctions, 99 for demand and residual and 99.9 for supply, so the same position always means the same volume in every auction.</p>
+<p>This row reads the true curve, so it is not a forecast. Out of the rolling candidate set (the real past curves of the same interval and the same weekday, dated on or before the first day of the test month minus 7 days), it returns the curve whose v-grid embedding is closest to the true curve's v-grid embedding in Euclidean distance. For a test month it may also return a curve from an earlier test month. It shows how close a single real curve from that candidate set can get to the truth.</p>
+
 <p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
 <h2>Summary</h2>
 <table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>68.56</td><td>191.90</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>55.10</td><td>163.16</td></tr><tr><td>Win % vs lag-7</td><td>89.5%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>29.47</td><td>29.23</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>22.89</td><td>22.15</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>26.07</td><td>25.05</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>3.37</td><td>3.09</td></tr></tbody></table>

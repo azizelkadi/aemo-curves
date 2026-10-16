@@ -5,7 +5,13 @@
 </head><body>
 <a class="back" href="index.html">← Back to index</a>
 <h1>Residual - weekly.wmedian</h1>
-<p>The index section <a href="index.html#data">Data</a> describes how this model works.</p>
+<h2>How it works</h2>
+<p>Nothing is fitted. The forecast is a new step curve built from the curves of the same interval 7, 8, 9, 10, 11, 12, 13, 14, 21 and 28 days earlier.</p>
+<ol>
+<li><b>Median.</b> At each volume, the forecast price is the weighted median of the prices of these 10 curves at that volume. The lag-7 curve has weight 2 and every other curve has weight 1, so the total weight is 11 and the price at each volume is one of the 10 prices.</li>
+<li><b>Volume range.</b> A curve's start volume is the end of its first step, and its end volume is the end of its last step. For demand and residual, the forecast starts at the median of the 10 start volumes and ends at the median of the 10 end volumes. For supply, it starts and ends where the lag-7 curve does.</li>
+</ol>
+
 <p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
 <h2>Summary</h2>
 <table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>159.88</td><td>191.90</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>137.07</td><td>163.16</td></tr><tr><td>Win % vs lag-7</td><td>65.3%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>23.31</td><td>29.23</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>17.65</td><td>22.15</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>21.22</td><td>25.05</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>1.80</td><td>3.09</td></tr></tbody></table>

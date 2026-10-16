@@ -5,7 +5,15 @@
 </head><body>
 <a class="back" href="index.html">← Back to index</a>
 <h1>Demand - medoids.dtw_predicted</h1>
-<p>The index section <a href="index.html#method-2">Method 2: Medoids</a> describes how this model works.</p>
+<h2>How it works</h2>
+<p>A medoid is a real training curve chosen by k-medoids to stand for a group of curves. This model uses medoids chosen with Dynamic Time Warping (DTW) as the distance.</p>
+<ol>
+<li><b>DTW.</b> DTW matches the steps of one curve to the steps of another, and it may match one step to several, so two curves with a different number of steps can be compared. Each step is a point with two coordinates, the price and the volume. The volume is divided by the curve total and multiplied by 50, so both coordinates count about the same. Matched points are at most 10 positions apart. The dissimilarity is the square root of the summed squared distances between the matched points.</li>
+<li><b>Medoids.</b> On a subsample of 480 training curves, spread evenly over the 48 intervals, k-medoids (Partition Around Medoids) picks K medoids: 24 for demand, 20 for supply and 24 for residual.</li>
+<li><b>Embedding.</b> Any curve is described by K numbers, its DTW dissimilarity to each medoid.</li>
+<li><b>Forecast.</b> One ridge regression per interval, with penalty 5.0, predicts the K numbers of the delivery day from the K numbers of the same interval 7, 8, 14 and 21 days earlier, plus five calendar features. The forecast is the medoid with the smallest predicted dissimilarity.</li>
+</ol>
+
 <p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
 <h2>Summary</h2>
 <table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>185.53</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>161.19</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>40.5%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>31.34</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>25.58</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>32.67</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>7.95</td><td>5.75</td></tr></tbody></table>

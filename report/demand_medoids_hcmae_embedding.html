@@ -5,7 +5,17 @@
 </head><body>
 <a class="back" href="index.html">← Back to index</a>
 <h1>Demand - medoids.hcmae_embedding</h1>
-<p>The index section <a href="index.html#method-2">Method 2: Medoids</a> describes how this model works.</p>
+<h2>How it works</h2>
+<p>A medoid is a real training curve chosen by k-medoids to stand for a group of curves. Each curve is described by 48 numbers, its exact HC-MAE to each of 48 medoids, and the model predicts those 48 numbers.</p>
+<p>The 48 medoids are real training curves chosen under HC-MAE, from the training window only (1 January 2021 to 30 April 2024). The search reads each curve at 2,048 equally spaced volumes, which gives a fast approximation of HC-MAE. It runs FasterPAM, a fast version of Partition Around Medoids, on a sample of 12,000 training curves spread evenly over the months and intervals. Then, on all training curves, each curve is assigned to its nearest medoid, and a medoid moves to another curve of its group when that lowers the summed distance to the curves of the group, for at most 6 rounds.</p>
+<ol>
+<li><b>Query.</b> For each of the 48 intervals, one ridge regression predicts the 48 numbers of the delivery day D from the 48 numbers of the same interval 7 days earlier, five calendar features (the day of week as a sine and a cosine, a weekend flag, and the month as a sine and a cosine) and the market-state proxy. The features are standardised and reduced to 20 principal components, and the ridge penalty is 200.</li>
+<li><b>Candidates.</b> The candidate set holds the curves of the same interval on any weekday, dated from 34 to 7 days before D.</li>
+<li><b>Median.</b> The candidates whose 48 numbers are closest to the prediction in Euclidean distance are kept, 5 of them for demand and 10 for supply. At each volume, the forecast price is the median of their prices, so the forecast is a new step curve and not a medoid. It starts at the median of their start volumes and ends at the median of their end volumes.</li>
+<li><b>Refit.</b> The model refits at the start of every test month on the auctions dated on or before the first day of that month minus 7 days. That data includes the earlier test months.</li>
+</ol>
+<p>The market-state proxy holds thirteen daily numbers, all read from the day 7 days before the delivery day. Five describe that day's prices and volume: the mean, median and spread of the prices, the total volume, and the number of bid or offer rows. Two are read from that day's interp embeddings: the mean length of the 64-number vectors and their mean price range. The other six are trend numbers: the 7-day and 28-day trailing mean price, two price trends, a price z-score and a volume trend. The proxy also adds the day of year as a sine and a cosine, and Western Australian holiday flags.</p>
+
 <p class="subtitle">7-day-ahead · test 2024-05-01 → 2025-04-24 · 17,232 auctions · reference: lag-7 baseline</p>
 <h2>Summary</h2>
 <table><thead><tr><th></th><th>This model</th><th>lag-7 baseline</th></tr></thead><tbody><tr><td>Mean HC-MAE ($/MWh)</td><td>118.90</td><td>148.97</td></tr><tr><td>Median HC-MAE ($/MWh)</td><td>95.34</td><td>121.92</td></tr><tr><td>Win % vs lag-7</td><td>63.3%</td><td>-</td></tr><tr><td>Mean |ΔV*| (MWh)</td><td>29.68</td><td>38.02</td></tr><tr><td>Median |ΔV*| (MWh)</td><td>20.44</td><td>23.72</td></tr><tr><td>Mean |ΔP*| ($/MWh)</td><td>27.84</td><td>30.29</td></tr><tr><td>Median |ΔP*| ($/MWh)</td><td>3.58</td><td>5.75</td></tr></tbody></table>

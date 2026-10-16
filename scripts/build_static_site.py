@@ -22,6 +22,7 @@ Run:  uv run python scripts/build_static_site.py [--side demand|supply|residual|
 from __future__ import annotations
 
 import argparse
+import html
 import gc
 import json
 import sys
@@ -99,17 +100,38 @@ KEPT_ORACLES = {
     "adaptive.oracle_weight",
     "diagnostic.oracle_shift",
 }
-# Optional per-experiment text shown first on its detail page, named <experiment>.html.
+# Per-experiment text shown first on its detail page, named <experiment>.html. An experiment
+# without one shows the comment block of its YAML instead.
 MODEL_TEXT_DIR = DEFAULT_SECTIONS_DIR / "models"
-# Index section that describes the models of each family, linked from detail pages without their own text.
-FAMILY_SECTION = {
-    "Baseline": ("data", "Data"),
-    "Retrieval": ("method-1", "Method 1: Retrieval"),
-    "Medoids": ("method-2", "Method 2: Medoids"),
-    "Adaptive": ("method-3", "Method 3: Adaptive"),
-    "Diagnostic": ("results", "Results"),
-    "Other": ("results", "Results"),
-}
+
+def yaml_comment_html(side: str, name: str) -> str:
+    """The leading comment block of the experiment's YAML as HTML paragraphs.
+
+    Used on a detail page when the experiment has no text in MODEL_TEXT_DIR. The
+    closing "Scored under HC-MAE ..." line is left out, because every row shares it.
+    """
+    family, _, stem = name.partition(".")
+    path = EXPERIMENTS_DIR / side / "7d" / "hc_mae" / family / f"{stem}.yaml"
+    if not path.exists():
+        warn(f"no YAML for {side} {name!r}, its detail page has no explanation")
+        return ""
+    paras, cur = [], []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("#"):
+            if line.strip():
+                break
+            continue
+        text = line.lstrip("#").strip()
+        if not text:
+            if cur:
+                paras.append(" ".join(cur))
+                cur = []
+        elif not text.startswith("Scored under HC-MAE"):
+            cur.append(text)
+    if cur:
+        paras.append(" ".join(cur))
+    return "".join(f"<p>{html.escape(t)}</p>\n" for t in paras)
+
 HIDDEN_FILE = SCRIPTS_DIR / "report_hidden.yaml"
 
 
@@ -601,11 +623,7 @@ def build_detail_page(
         # The model's own text comes first and carries its caveats.
         parts.append(model_text.read_text(encoding="utf-8"))
     else:
-        anchor, section = FAMILY_SECTION[classify_family(name)]
-        parts.append(
-            f'<p>The index section <a href="index.html#{anchor}">{section}</a> describes how this '
-            "model works.</p>"
-        )
+        parts.append("<h2>How it works</h2>\n" + yaml_comment_html(side, name))
         low = name.lower()
         if "wactual" in low:
             parts.append(f"<p>{WACTUAL_NOTE}</p>")
@@ -763,26 +781,15 @@ def read_fragment(sections_dir: Path, filename: str, heading: str) -> str:
     return f"<h2>{heading}</h2>\n<p>Section text pending.</p>"
 
 
-def _mix(c0: tuple, c1: tuple, t: float) -> str:
-    t = min(max(t, 0.0), 1.0)
-    r, g, b = (round(a + (bb - a) * t) for a, bb in zip(c0, c1))
-    return f"#{r:02x}{g:02x}{b:02x}"
-
-
-# Pastel row colours. Better than the baseline: light to stronger green as HC-MAE falls.
-# Worse than the baseline: yellow, then orange, then red as HC-MAE rises.
-GREEN_LIGHT, GREEN_STRONG = (236, 248, 236), (184, 228, 186)
-YELLOW, ORANGE, RED = (255, 247, 204), (255, 222, 184), (250, 196, 192)
+# Flat row colours: grey for the baseline (the row-baseline class), blue for oracles,
+# green for a forecast better than the baseline and red for one that is not.
 ORACLE_BLUE = "#dde9f8"
+BETTER_GREEN = "#d6efd9"
+WORSE_RED = "#f6d3cf"
 
 
-def _row_colour(hc: float, base: float, best: float, worst: float) -> str:
-    if hc <= base:
-        span = base - best
-        return _mix(GREEN_LIGHT, GREEN_STRONG, (base - hc) / span if span > 0 else 1.0)
-    span = worst - base
-    t = (hc - base) / span if span > 0 else 1.0
-    return _mix(YELLOW, ORANGE, t * 2) if t <= 0.5 else _mix(ORANGE, RED, (t - 0.5) * 2)
+def _row_colour(hc: float, base: float) -> str:
+    return BETTER_GREEN if hc < base else WORSE_RED
 
 
 def _results_table(side: str, pages: dict[str, str]) -> str:
@@ -791,8 +798,6 @@ def _results_table(side: str, pages: dict[str, str]) -> str:
     classes: list[str] = []
     styles: list[str] = []
     base_hc = next((r["hc"] for r in rows if r["name"] == BASELINE_NAME), None)
-    forecasts = [r["hc"] for r in rows if r["kind"] == "forecast"]
-    best_hc, worst_hc = min(forecasts), max(forecasts)
     for r in rows:
         method = r["family"] + (" (oracle)" if r["kind"] == "oracle" else "")
         href = pages.get(r["name"])
@@ -818,7 +823,7 @@ def _results_table(side: str, pages: dict[str, str]) -> str:
             styles.append(f"background:{ORACLE_BLUE}")
         else:
             classes.append("")
-            colour = _row_colour(r["hc"], base_hc, best_hc, worst_hc) if base_hc else ""
+            colour = _row_colour(r["hc"], base_hc) if base_hc else ""
             styles.append(f"background:{colour}" if colour else "")
     return table_html(RESULTS_COLS, body, classes, table_class="results", row_styles=styles)
 

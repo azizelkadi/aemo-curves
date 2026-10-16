@@ -1,0 +1,7 @@
+<h2>How it works</h2>
+<p>Nothing is fitted. The model is the weighted median weekly.wmedian with one change at the price cap.</p>
+<ol>
+<li><b>Cap.</b> The cap of a day is the highest offer price over all supply curves of that day. The cap known for the delivery day D is the cap of day D-7.</li>
+<li><b>Cap mapping.</b> In each of the 10 curves (the same interval 7, 8, 9, 10, 11, 12, 13, 14, 21 and 28 days earlier) whose own day has a cap different from the known cap, every step priced at or above the cap of its own day minus 0.5 $/MWh is set to the known cap. When the known cap is lower, every price above the known cap is also lowered to the known cap.</li>
+<li><b>Median.</b> At each volume, the forecast price is the weighted median of the prices of the 10 mapped curves. The lag-7 curve has weight 2 and every other curve has weight 1. The forecast starts and ends where the lag-7 curve does.</li>
+</ol>
